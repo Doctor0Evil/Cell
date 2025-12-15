@@ -1,4 +1,3 @@
-# File: res://meta/credits_registry.gd
 extends Node
 class_name CreditsRegistry
 
@@ -18,3 +17,10 @@ const CC_BY_ASSETS := [
         "source_url": "https://example.com/rust-door-hit"
     }
 ]
+
+static func get_assets_by_type(asset_type: String) -> Array:
+    var out: Array = []
+    for entry in CC_BY_ASSETS:
+        if entry.get("type", "") == asset_type:
+            out.append(entry)
+    return out
