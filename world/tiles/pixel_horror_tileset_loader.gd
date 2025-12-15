@@ -2,19 +2,20 @@ extends Node2D
 class_name PixelHorrorTilesetLoader
 
 @export var tilemap: TileMap
-@export var tileset_path: String = "res://ASSETS/CC0/tilesets/pixel_horror_facility.tres"
+@export var tileset: TileSet
+@export var license_tag := "CC0"  # "CC0" or "CC_BY" – for internal audit
 
 func _ready() -> void:
     if not tilemap:
         push_warning("PixelHorrorTilesetLoader: tilemap not assigned.")
         return
-    if not ResourceLoader.exists(tileset_path):
-        push_warning("PixelHorrorTilesetLoader: tileset '%s' not found." % tileset_path)
+    if not tileset:
+        push_warning("PixelHorrorTilesetLoader: tileset not assigned.")
         return
 
-    var ts: TileSet = load(tileset_path)
-    tilemap.tile_set = ts
+    # Internal safety: only allow vetted tilesets (you enforce in import pipeline).
+    if license_tag != "CC0" and license_tag != "CC_BY":
+        push_error("PixelHorrorTilesetLoader: tileset has unsupported license_tag: %s" % license_tag)
+        return
 
-    # Example: tag cell (0,0) as a blocked, bloody floor tile for quick testing
-    # layer 0, source_id 0, atlas (3,1) – assumes a CC0 tileset with blood tile at that coord
-    tilemap.set_cell(0, Vector2i(0, 0), 0, Vector2i(3, 1))
+    tilemap.tile_set = tileset
