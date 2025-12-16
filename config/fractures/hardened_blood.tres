@@ -1,0 +1,10 @@
+[resource]
+resource_name = "HardenedBlood"
+id = "HARDENED_BLOOD"
+display_name = "Hardened Blood"
+description = "Clots fast, moves slow. You bleed less, but every step is heavier."
+fracture_type = 1 # SCARRING
+blood_loss_mult = 0.85
+stamina_max_mult = 0.9
+stamina_recovery_mult = 0.9
+tags = ["SCARRING", "BLOOD", "STAMINA"]
