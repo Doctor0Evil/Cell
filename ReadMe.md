@@ -38,13 +38,17 @@ CELL focuses on:
 
 ### Player controller and survival loop
 
-- First‑person or over‑shoulder controller with:
-  - Movement, sprinting with stamina, jumping, and a toggleable flashlight
-  - Input‑driven, Godot‑native controls (actions in the Input Map)
+- Top‑down 2.5D controller with:
+  - Grid‑aligned movement, sprinting with stamina, contextual interaction, and a cone‑based flashlight/visor arc
+  - Input‑driven, Godot‑native controls (actions defined in the Input Map for keyboard, mouse, and gamepad)
 - Global `GameState` for:
-  - Health, sanity, alert level
-  - Death tracking and runtime metrics
-  - Group‑wide death callbacks for scene‑wide responses
+  - Health, sanity, alert level, and V.I.T.A.L.I.T.Y.‑driven resource pools (Blood, Protein, Oxygen, Stamina, Wellness, Body‑Temperature)
+  - Death tracking and runtime metrics for balancing brutal survival loops
+  - Group‑wide death callbacks to drive scene‑wide reactions (lockdown events, monster surges, settlement collapse)
+- 2.5D assets and animations:
+  - Directional sprites and/or pseudo‑3D characters rendered from isometric/top‑down perspective
+  - Tile‑based procedural maps (labs, hull blocks, craters) using multi‑layer `TileMap` scenes for floor, walls, and overlays
+  - Animation states for idle, move, sprint, bleed, panic, and collapse tuned for overhead readability
 
 ---
 
