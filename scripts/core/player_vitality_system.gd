@@ -1,7 +1,11 @@
 extends Resource
 class_name PlayerVitalitySystem
 
-# Primary V.I.T.A.L.I.T.Y. attributes (0–10)
+# ========================
+#  Primary V.I.T.A.L.I.T.Y.
+# ========================
+
+# 0–10 core attributes
 @export var vitality: float = 5.0    # Biological resilience, bleed-out, infection resistance
 @export var instinct: float = 5.0    # Threat awareness, reflex
 @export var tenacity: float = 5.0    # Endurance under stress
@@ -11,7 +15,7 @@ class_name PlayerVitalitySystem
 @export var temper: float = 5.0      # Emotional control, panic
 @export var yield: float = 5.0       # Resource conversion efficiency
 
-# Secondary attributes (0–10)
+# Secondary attributes 0–10
 @export var constitution: float = 5.0
 @export var dexterity: float = 5.0
 @export var intelligence: float = 5.0
@@ -19,7 +23,10 @@ class_name PlayerVitalitySystem
 @export var speed: float = 5.0
 @export var strength: float = 5.0
 
-# Runtime resource pools – these are the hard edges of survival
+# ========================
+#  Resource pools (runtime)
+# ========================
+
 var blood: float = 100.0
 var blood_max: float = 100.0
 
@@ -35,30 +42,42 @@ var stamina_max: float = 100.0
 var wellness: float = 100.0
 var wellness_max: float = 100.0
 
-var body_temperature: float = 37.0        # Celsius
+var body_temperature: float = 37.0      # Celsius
 var body_temperature_min: float = 26.0
 var body_temperature_max: float = 41.0
+
+# NEW: Water / hydration
+var water: float = 100.0
+var water_max: float = 100.0
 
 # Collapse / failure counters
 var starving_stacks: int = 0
 var blood_collapse_count: int = 0
 var stamina_collapse_count: int = 0
+var dehydration_stacks: int = 0
+
+# ========================
+#  Maxima from attributes
+# ========================
 
 func recalc_maxima() -> void:
-    # Max pool values derived from attributes
-    blood_max = 70.0 + vitality * 4.0 + constitution * 3.0
-    stamina_max = 60.0 + tenacity * 5.0 + agility * 3.0
+    blood_max    = 70.0 + vitality * 4.0 + constitution * 3.0
+    stamina_max  = 60.0 + tenacity * 5.0 + agility * 3.0
     wellness_max = 60.0 + temper * 4.0 + influence * 3.0 + instinct * 2.0
-    protein_max = 30.0 + yield * 4.0 + vitality * 2.0
-    oxygen_max = 80.0 + tenacity * 3.0 + logic * 2.0 + yield * 2.0
+    protein_max  = 30.0 + yield * 4.0 + vitality * 2.0
+    oxygen_max   = 80.0 + tenacity * 3.0 + logic * 2.0 + yield * 2.0
+    water_max    = 100.0 + yield * 2.0 + vitality * 1.0
 
-    blood = clamp(blood, 0.0, blood_max)
-    stamina = clamp(stamina, 0.0, stamina_max)
+    blood    = clamp(blood, 0.0, blood_max)
+    stamina  = clamp(stamina, 0.0, stamina_max)
     wellness = clamp(wellness, 0.0, wellness_max)
-    protein = clamp(protein, 0.0, protein_max)
-    oxygen = clamp(oxygen, 0.0, oxygen_max)
+    protein  = clamp(protein, 0.0, protein_max)
+    oxygen   = clamp(oxygen, 0.0, oxygen_max)
+    water    = clamp(water, 0.0, water_max)
 
-# === Derived multipliers ===
+# ========================
+#  Derived multipliers
+# ========================
 
 func get_move_speed_multiplier() -> float:
     var m := 0.6 + speed * 0.06 + agility * 0.04
@@ -68,12 +87,12 @@ func get_melee_damage_multiplier() -> float:
     return clamp(0.5 + strength * 0.1, 0.5, 2.5)
 
 func get_healing_efficiency() -> float:
-    var eff := yield * 0.6 + vitality * 0.2 + max(1.0, protein_max) / 10.0
+    var eff := yield * 0.6 + vitality * 0.2 + min(1.0, protein_max / 10.0)
     return clamp(0.5 + eff * 0.05, 0.5, 2.0)
 
 func get_sanity_stability() -> float:
-    var eff := temper * 0.5 + instinct * 0.3 + logic * 0.2
-    return clamp(0.4 + eff * 0.06, 0.4, 2.0)
+    var eff := (temper * 0.5 + instinct * 0.3 + logic * 0.2)
+    return clamp(0.4 + (eff / 10.0) * 0.06, 0.4, 2.0)
 
 func get_oxygen_decay_rate(base_rate: float) -> float:
     var eff := (yield * 0.4 + tenacity * 0.3 + instinct * 0.2 + logic * 0.1) / 10.0
@@ -87,7 +106,14 @@ func get_stamina_decay_rate(base_rate: float) -> float:
     var eff := (tenacity * 0.5 + agility * 0.3 + instinct * 0.2) / 10.0
     return base_rate * clamp(1.2 - eff, 0.3, 1.5)
 
-# === Core tick logic ===
+# NEW: water decay – Yield + Tenacity + Vitality slow thirst
+func get_water_decay_rate(base_rate: float) -> float:
+    var eff := (yield * 0.5 + tenacity * 0.3 + vitality * 0.2) / 10.0
+    return base_rate * clamp(1.3 - eff, 0.4, 1.6)
+
+# ========================
+#  Core tick logic
+# ========================
 
 func tick_environment(delta: float, env_cold_factor: float, env_stress: float) -> void:
     # Temperature
@@ -99,7 +125,7 @@ func tick_environment(delta: float, env_cold_factor: float, env_stress: float) -
     var oxy_rate := get_oxygen_decay_rate(1.0 + env_stress * 0.4)
     oxygen = max(0.0, oxygen - oxy_rate * delta)
 
-    # Stamina
+    # Stamina (baseline stress)
     var stamina_rate := get_stamina_decay_rate(env_stress * 0.8)
     stamina = max(0.0, stamina - stamina_rate * delta)
 
@@ -122,13 +148,45 @@ func tick_protein(delta: float, travel_load: float, awake_load: float) -> void:
             tenacity = max(0.0, tenacity - 0.1)
             wellness = max(0.0, wellness - 3.0)
 
-# === Damage / healing / exertion ===
+# NEW: water / thirst tick
+func tick_water(delta: float, activity_load: float) -> void:
+    # activity_load: ~0.5 idle, 1.0 walk, 1.5+ sprint/combat
+    var base_rate := 0.05 + activity_load * 0.12
+    var rate := get_water_decay_rate(base_rate)
+    water = max(0.0, water - rate * delta)
+
+    if water <= 0.0:
+        _on_dehydration_zero(delta)
+    elif water / water_max < 0.3:
+        _on_thirst_threshold(delta)
+
+func _on_thirst_threshold(delta: float) -> void:
+    # Persistent thirst: chip stamina and wellness
+    dehydration_stacks = max(dehydration_stacks, 1)
+    stamina = max(0.0, stamina - 0.5 * delta)
+    wellness = max(0.0, wellness - 0.2 * delta)
+
+func _on_dehydration_zero(delta: float) -> void:
+    # Hard dehydration: drain blood and attributes progressively
+    if dehydration_stacks < 10:
+        dehydration_stacks += 1
+
+    var damage := 1.0 + float(dehydration_stacks) * 0.2
+    blood = max(0.0, blood - damage * delta)
+    wellness = max(0.0, wellness - 1.0 * delta)
+    tenacity = max(0.0, tenacity - 0.01 * delta)
+    vitality = max(0.0, vitality - 0.01 * delta)
+
+# ========================
+#  Damage / healing / exertion
+# ========================
 
 func apply_damage(amount: float) -> bool:
     blood = max(0.0, blood - amount)
     if blood <= 0.0:
         wellness = max(0.0, wellness - 20.0)
-        return true    # dead
+        return true  # dead
+
     if blood < blood_max * 0.25:
         if blood_collapse_count == 0 or randi() % 100 < 5:
             blood_collapse_count += 1
@@ -156,7 +214,9 @@ func tick_stamina(delta: float, exertion: float, base_recovery: float) -> bool:
         return true
     return false
 
-# === Oxygen capsule and ration-chip logic ===
+# ========================
+#  Oxygen capsules / ration-chips
+# ========================
 
 func use_oxygen_capsule(strength: float) -> void:
     # Brutal but useful: more oxygen, but long-term strain.
@@ -181,4 +241,5 @@ func apply_ration_chip_tier(tier: int) -> void:
             logic = min(10.0, logic + factor)
             intelligence = min(10.0, intelligence + factor)
             yield = min(10.0, yield + factor * 0.8)
+
     recalc_maxima()
