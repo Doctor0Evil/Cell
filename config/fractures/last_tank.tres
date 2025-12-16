@@ -1,0 +1,14 @@
+[resource]
+resource_name = "LastTank"
+id = "LAST_TANK"
+display_name = "Last Tank"
+description = "When the gauges hit red, something in you refuses to stop."
+fracture_type = 2 # REACTIVE
+trigger_oxygen_ratio_lt = 0.10
+trigger_water_ratio_lt = 0.10
+surge_duration = 8.0
+move_speed_bonus = 0.15
+accuracy_bonus = 0.10
+wellness_max_scar = 1.0
+yield_scar = 0.1
+tags = ["REACTIVE", "OXYGEN", "WATER"]
