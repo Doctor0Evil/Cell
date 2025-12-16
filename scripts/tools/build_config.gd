@@ -4,133 +4,112 @@ class_name BuildConfig
 
 const SETTINGS_FILE := "user://settings.cfg"
 
-# Canonical Windows desktop resolutions ordered by cost.
-const VIDEO_PRESETS := [
-    {
-        "id": "LOW_720P",
-        "width": 1280,
-        "height": 720,
-        "fullscreen": false,
-        "vsync": true,
-        "description": "Lower resolution for unstable systems."
-    },
-    {
-        "id": "MID_900P",
-        "width": 1600,
-        "height": 900,
-        "fullscreen": false,
-        "vsync": true,
-        "description": "Balanced resolution for typical laptops."
-    },
-    {
-        "id": "BASE_1080P",
+# Canonical video presets for each platform family.
+const VIDEO_PRESETS := {
+    "Windows": {
+        "id": "WIN_BASE_1080P",
         "width": 1920,
         "height": 1080,
         "fullscreen": true,
-        "vsync": true,
-        "description": "Default target for CELL on desktop."
+        "vsync": true
     },
-    {
-        "id": "HIGH_1440P",
+    "Linux": {
+        "id": "LIN_MID_900P",
+        "width": 1600,
+        "height": 900,
+        "fullscreen": false,
+        "vsync": true
+    },
+    "macOS": {
+        "id": "MAC_HIGH_1440P",
         "width": 2560,
         "height": 1440,
         "fullscreen": true,
-        "vsync": true,
-        "description": "High‑end displays; heavier cost."
+        "vsync": true
+    },
+    "Mobile": {
+        "id": "MOB_720P",
+        "width": 1280,
+        "height": 720,
+        "fullscreen": true,
+        "vsync": true
     }
-]
+}
 
-# Default audio mix aimed at grounded survival‑horror ambience.
+# Default audio curve tuned for tense, quiet corridors with sharp SFX.
 const AUDIO_DEFAULTS := {
     "Master": -3.0,
     "SFX": -6.0,
-    "Music": -8.0,
-    "Ambient": -10.0,
-    "UI": -10.0
+    "Music": -10.0,
+    "Ambient": -12.0,
+    "UI": -14.0
 }
 
-# Input defaults so automation and in‑game prompts have a stable map.
-# These correspond to Godot InputMap actions configured in project.godot.
-const INPUT_DEFAULTS := {
-    "move_forward": { "type": "key", "keycode": KEY_W },
-    "move_backward": { "type": "key", "keycode": KEY_S },
-    "move_left": { "type": "key", "keycode": KEY_A },
-    "move_right": { "type": "key", "keycode": KEY_D },
-    "sprint": { "type": "key", "keycode": KEY_SHIFT },
-    "crouch": { "type": "key", "keycode": KEY_CTRL },
-    "interact": { "type": "key", "keycode": KEY_E },
-    "flashlight": { "type": "key", "keycode": KEY_F },
-    "inventory": { "type": "key", "keycode": KEY_TAB },
-    "pause": { "type": "key", "keycode": KEY_ESCAPE }
-}
-
-# Debug and telemetry toggles for development builds.
+# Debug / telemetry toggles for development builds.
 const DEBUG_FLAGS := {
     "show_fps": true,
     "show_runtime_overlay": true,
     "log_to_file": false,
-    "log_max_entries": 2048
+    "max_log_entries": 2048
 }
 
-# -------------------------------------------------------------------
-# WINDOWS VIDEO / APP DEFAULTS
-# -------------------------------------------------------------------
+# -------------------------------
+# --- PLATFORM DEFAULTS ---
+# -------------------------------
 
 static func apply_default_windows_settings() -> void:
-    var base := VIDEO_PRESETS[2]  # BASE_1080P
-    ProjectSettings.set_setting("display/window/size/viewport_width", base["width"])
-    ProjectSettings.set_setting("display/window/size/viewport_height", base["height"])
-    ProjectSettings.set_setting("display/window/size/window_width", base["width"])
-    ProjectSettings.set_setting("display/window/size/window_height", base["height"])
-    ProjectSettings.set_setting("display/window/stretch/mode", "viewport")
-    ProjectSettings.set_setting("display/window/stretch/aspect", "keep")
-    ProjectSettings.set_setting("display/window/vsync/vsync_mode", DisplayServer.VSYNC_ENABLED)
-
+    var p := VIDEO_PRESETS["Windows"]
+    _apply_core_video_defaults(p["width"], p["height"], p["fullscreen"], p["vsync"])
     ProjectSettings.set_setting("application/config/name", "CELL")
     ProjectSettings.set_setting("application/config/icon", "res://ASSETS/icons/cell_icon.ico")
+    ProjectSettings.save()
+    DebugLog.log("BuildConfig", "APPLY_WINDOWS_DEFAULTS", p)
+
+static func apply_default_linux_settings() -> void:
+    var p := VIDEO_PRESETS["Linux"]
+    _apply_core_video_defaults(p["width"], p["height"], p["fullscreen"], p["vsync"])
+    ProjectSettings.set_setting("application/config/name", "CELL")
+    ProjectSettings.set_setting("application/config/icon", "res://ASSETS/icons/cell_icon.png")
+    ProjectSettings.save()
+    DebugLog.log("BuildConfig", "APPLY_LINUX_DEFAULTS", p)
+
+static func apply_default_macos_settings() -> void:
+    var p := VIDEO_PRESETS["macOS"]
+    _apply_core_video_defaults(p["width"], p["height"], p["fullscreen"], p["vsync"])
+    ProjectSettings.set_setting("application/config/name", "CELL")
+    ProjectSettings.set_setting("application/config/icon", "res://ASSETS/icons/cell_icon.icns")
+    ProjectSettings.save()
+    DebugLog.log("BuildConfig", "APPLY_MACOS_DEFAULTS", p)
+
+static func apply_default_mobile_settings() -> void:
+    var p := VIDEO_PRESETS["Mobile"]
+    _apply_core_video_defaults(p["width"], p["height"], p["fullscreen"], p["vsync"])
+    ProjectSettings.set_setting("application/config/name", "CELL")
+    ProjectSettings.set_setting("application/config/icon", "res://ASSETS/icons/cell_icon_mobile.png")
+    ProjectSettings.set_setting("display/window/stretch/mode", "2d")
+    ProjectSettings.set_setting("display/window/stretch/aspect", "keep")
+    ProjectSettings.save()
+    DebugLog.log("BuildConfig", "APPLY_MOBILE_DEFAULTS", p)
+
+static func _apply_core_video_defaults(width: int, height: int, fullscreen: bool, vsync: bool) -> void:
+    ProjectSettings.set_setting("display/window/size/viewport_width", width)
+    ProjectSettings.set_setting("display/window/size/viewport_height", height)
+    ProjectSettings.set_setting("display/window/size/window_width", width)
+    ProjectSettings.set_setting("display/window/size/window_height", height)
+    ProjectSettings.set_setting("display/window/stretch/mode", "viewport")
+    ProjectSettings.set_setting("display/window/stretch/aspect", "keep")
+
+    ProjectSettings.set_setting(
+        "display/window/vsync/vsync_mode",
+        DisplayServer.VSYNC_ENABLED if vsync else DisplayServer.VSYNC_DISABLED
+    )
+
     ProjectSettings.set_setting("rendering/anti_aliasing/quality/msaa_3d", 1) # 2x
     ProjectSettings.set_setting("rendering/environment/defaults/default_clear_color", Color(0, 0, 0, 1))
-    ProjectSettings.save()
 
-    DebugLog.log("BuildConfig", "APPLY_WINDOWS_DEFAULTS", {
-        "width": base["width"],
-        "height": base["height"],
-        "preset_id": base["id"]
-    })
-
-# -------------------------------------------------------------------
-# AUDIO DEFAULTS
-# -------------------------------------------------------------------
-
-static func apply_default_audio_settings() -> void:
-    for bus_name in AUDIO_DEFAULTS.keys():
-        var idx := AudioServer.get_bus_index(bus_name)
-        if idx >= 0:
-            AudioServer.set_bus_volume_db(idx, AUDIO_DEFAULTS[bus_name])
-    DebugLog.log("BuildConfig", "APPLY_AUDIO_DEFAULTS", AUDIO_DEFAULTS)
-
-# -------------------------------------------------------------------
-# INPUT MAP DEFAULTS (OPTIONAL)
-# -------------------------------------------------------------------
-
-static func apply_default_input_map() -> void:
-    for action in INPUT_DEFAULTS.keys():
-        if not InputMap.has_action(action):
-            InputMap.add_action(action)
-        # Clear existing events and re‑apply defaults.
-        InputMap.action_erase_events(action)
-        var data := INPUT_DEFAULTS[action]
-        if data["type"] == "key":
-            var ev := InputEventKey.new()
-            ev.physical_keycode = data["keycode"]
-            InputMap.action_add_event(action, ev)
-    DebugLog.log("BuildConfig", "APPLY_INPUT_DEFAULTS", {
-        "actions": INPUT_DEFAULTS.keys()
-    })
-
-# -------------------------------------------------------------------
-# SETTINGS SAVE / LOAD
-# -------------------------------------------------------------------
+# -------------------------------
+# --- SETTINGS PERSISTENCE ---
+# -------------------------------
 
 static func save_settings() -> void:
     var cfg := ConfigFile.new()
@@ -141,16 +120,12 @@ static func save_settings() -> void:
     cfg.set_value("video", "resolution", DisplayServer.window_get_size())
     cfg.set_value("video", "vsync", DisplayServer.window_get_vsync_mode() == DisplayServer.VSYNC_ENABLED)
 
-    # Store nearest known preset ID for analytics / quick restore.
-    var res := DisplayServer.window_get_size()
-    var preset_id := _get_closest_preset_id(res)
-    cfg.set_value("video", "preset_id", preset_id)
-
     # AUDIO
     for bus_name in AUDIO_DEFAULTS.keys():
         var idx := AudioServer.get_bus_index(bus_name)
         if idx >= 0:
-            cfg.set_value("audio", bus_name.to_lower() + "_db", AudioServer.get_bus_volume_db(idx))
+            var key := bus_name.to_lower() + "_db"
+            cfg.set_value("audio", key, AudioServer.get_bus_volume_db(idx))
 
     # DEBUG
     for flag in DEBUG_FLAGS.keys():
@@ -159,9 +134,7 @@ static func save_settings() -> void:
     var err := cfg.save(SETTINGS_FILE)
     DebugLog.log("BuildConfig", "SAVE_SETTINGS", {
         "file": SETTINGS_FILE,
-        "result": err,
-        "preset_id": preset_id,
-        "resolution": [res.x, res.y]
+        "result": err
     })
 
 static func load_settings() -> void:
@@ -172,9 +145,6 @@ static func load_settings() -> void:
             "file": SETTINGS_FILE,
             "error": err
         })
-        # Fallback to defaults.
-        apply_default_windows_settings()
-        apply_default_audio_settings()
         return
 
     # VIDEO
@@ -192,14 +162,14 @@ static func load_settings() -> void:
 
     # AUDIO
     for bus_name in AUDIO_DEFAULTS.keys():
-        var key := bus_name.to_lower() + "_db"
-        var default_db := AUDIO_DEFAULTS[bus_name]
-        var db := float(cfg.get_value("audio", key, default_db))
         var idx := AudioServer.get_bus_index(bus_name)
         if idx >= 0:
+            var key := bus_name.to_lower() + "_db"
+            var default_db := AUDIO_DEFAULTS[bus_name]
+            var db := float(cfg.get_value("audio", key, default_db))
             AudioServer.set_bus_volume_db(idx, db)
 
-    # DEBUG (read‑only at runtime, but logged for diagnostics)
+    # DEBUG (read for telemetry, not forced)
     var debug_state: Dictionary = {}
     for flag in DEBUG_FLAGS.keys():
         debug_state[flag] = cfg.get_value("debug", flag, DEBUG_FLAGS[flag])
@@ -209,17 +179,35 @@ static func load_settings() -> void:
         "resolution": [res.x, res.y],
         "fullscreen": fullscreen,
         "vsync": vsync,
-        "debug_flags": debug_state
+        "debug": debug_state
     })
 
-# -------------------------------------------------------------------
-# EXPORT / BUILD‑TIME HELPERS
-# -------------------------------------------------------------------
+# -------------------------------
+# --- AUTO-DETECTION ---
+# -------------------------------
 
-static func export_profile_summary() -> Dictionary:
-    # Returns a compact snapshot of tuning so build scripts can embed it.
-    var current_res := DisplayServer.window_get_size()
-    var current_mode := DisplayServer.window_get_mode()
+static func apply_platform_defaults() -> void:
+    var name := OS.get_name()
+    match name:
+        "Windows":
+            apply_default_windows_settings()
+        "Linux", "FreeBSD":
+            apply_default_linux_settings()
+        "macOS":
+            apply_default_macos_settings()
+        "Android", "iOS":
+            apply_default_mobile_settings()
+        _:
+            DebugLog.log("BuildConfig", "UNKNOWN_PLATFORM", {"platform": name})
+
+# -------------------------------
+# --- RUNTIME SUMMARY (OPTIONAL)
+# -------------------------------
+
+static func get_runtime_profile() -> Dictionary:
+    # Compact snapshot for debug overlays / telemetry.
+    var size := DisplayServer.window_get_size()
+    var mode := DisplayServer.window_get_mode()
     var vsync := DisplayServer.window_get_vsync_mode() == DisplayServer.VSYNC_ENABLED
 
     var audio_snapshot: Dictionary = {}
@@ -228,32 +216,9 @@ static func export_profile_summary() -> Dictionary:
         if idx >= 0:
             audio_snapshot[bus_name] = AudioServer.get_bus_volume_db(idx)
 
-    var summary := {
-        "resolution": {
-            "width": current_res.x,
-            "height": current_res.y
-        },
-        "mode": current_mode,
-        "fullscreen": current_mode == DisplayServer.WINDOW_MODE_FULLSCREEN,
+    return {
+        "resolution": {"w": size.x, "h": size.y},
+        "fullscreen": mode == DisplayServer.WINDOW_MODE_FULLSCREEN,
         "vsync": vsync,
         "audio": audio_snapshot
     }
-
-    DebugLog.log("BuildConfig", "EXPORT_PROFILE_SUMMARY", summary)
-    return summary
-
-# -------------------------------------------------------------------
-# INTERNAL HELPERS
-# -------------------------------------------------------------------
-
-static func _get_closest_preset_id(size: Vector2i) -> String:
-    var best_id := VIDEO_PRESETS[2]["id"]
-    var best_score := 99999999
-    for preset in VIDEO_PRESETS:
-        var dx := int(preset["width"]) - size.x
-        var dy := int(preset["height"]) - size.y
-        var score := abs(dx) + abs(dy)
-        if score < best_score:
-            best_score = score
-            best_id = preset["id"]
-    return best_id
