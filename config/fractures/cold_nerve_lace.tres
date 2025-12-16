@@ -1,0 +1,9 @@
+[resource]
+resource_name = "ColdVergeNerveLace"
+id = "COLD_VERGE_NERVE_LACE"
+display_name = "Cold Verge Nerve Lace"
+description = "Black-Section wiring laced into your spine. The hull feels slower. You do not."
+fracture_type = 3 # SYNDICATE
+stamina_decay_mult = 0.85
+# dodge_window handled by combat system, but we tag for it:
+tags = ["SYNDICATE", "COLD", "STAMINA"]
