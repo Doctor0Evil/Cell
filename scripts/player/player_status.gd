@@ -1,5 +1,5 @@
-# File: scripts/player/PlayerStatus.gd
 extends Node
+class_name PlayerStatus
 
 @export var vitality_system: PlayerVitalitySystem
 @export var pools: PlayerPools
@@ -8,14 +8,14 @@ extends Node
 @export var infection_model: CellInfectionModel
 
 func _ready() -> void:
-    race.apply_to_vitality_system(vitality_system)
+    if race:
+        race.apply_to_vitality_system(vitality_system)
     vitality_system.recalc_maxima()
     pools.vitality_system = vitality_system
     pools.recalc_from_vitality()
     DebugLog.log("PlayerStatus", "INIT", {
         "race": race.display_name,
-        "vitality": vitality_system.vitality,
-        "oxygen_max": vitality_system.oxygen_max
+        "vitality": vitality_system.vitality
     })
 
 func _physics_process(delta: float) -> void:
