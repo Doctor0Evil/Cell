@@ -1,0 +1,8 @@
+[resource]
+resource_name = "ThirstMap"
+id = "THIRST_MAP"
+display_name = "Thirst Map"
+description = "The body reads rust-sweat and coolant like weather. You just know where the water is."
+fracture_type = 0 # ADAPTIVE
+water_decay_mult = 0.85
+tags = ["ADAPTIVE", "WATER"]
