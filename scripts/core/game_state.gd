@@ -1,36 +1,36 @@
 extends Node
 class_name GameState
 
-# Global game flags and tunables for Cell.
+var current_region_id: StringName = &""
+var player_scene_path: String = "res://scenes/player/Player.tscn"
+var current_profile_id: StringName = &""
 
-var player_health: int = 100
-var player_sanity: float = 1.0        # 0.0–1.0, affects visuals and audio
-var alert_level: float = 0.0          # 0.0–1.0, how “awake” the facility is
-var current_save_slot: int = 0
-var is_paused: bool = false
+var alert_level: float = 0.0
+var player_sanity: float = 1.0
+var infection_level: float = 0.0
 
-var inventory: Array = []             # Will be populated with item dicts
+var travel_load: float = 0.0
+var awake_load: float = 0.0
+var oxygen_drain_rate: float = 1.0
+var exertion_level: float = 0.0
+var stamina_recovery: float = 1.0
+var contamination_level: float = 0.0
+var current_region_cold: float = 0.0
+var current_region_stress: float = 0.0
 
-# Runtime metrics for telemetry / balancing.
-var play_time_seconds: int = 0
-var death_count: int = 0
+func reset_for_new_run() -> void:
+    alert_level = 0.0
+    player_sanity = 1.0
+    infection_level = 0.0
 
-func _process(delta: float) -> void:
-    if is_paused:
+func load_region(region_id: StringName) -> void:
+    current_region_id = region_id
+    var region_data := CellContentRegistry.get_region(region_id)
+    if region_data.is_empty():
+        push_error("Unknown region '%s'." % region_id)
         return
-    play_time_seconds += int(delta)
-
-func apply_damage(amount: int) -> void:
-    player_health = max(0, player_health - amount)
-    if player_health == 0:
-        _on_player_death()
-
-func modify_sanity(delta_sanity: float) -> void:
-    player_sanity = clamp(player_sanity + delta_sanity, 0.0, 1.0)
-
-func modify_alert(delta_alert: float) -> void:
-    alert_level = clamp(alert_level + delta_alert, 0.0, 1.0)
-
-func _on_player_death() -> void:
-    death_count += 1
-    get_tree().call_group("runtime", "on_player_death_global")
+    var scene_path: String = region_data.get("scene_path", "")
+    if scene_path == "":
+        push_error("Region '%s' has no scene_path." % region_id)
+        return
+    get_tree().change_scene_to_file(scene_path)
