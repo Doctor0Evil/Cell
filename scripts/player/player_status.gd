@@ -1,9 +1,11 @@
-# File: res://scripts/player/player_status.gd
 extends Node
 class_name PlayerStatus
 
 @export var vitality_system: PlayerVitalitySystem
 @export var pools: PlayerPools
+@export var suit: SuitIntegrity
+@export var env: OxygenEnvironment
+
 @export var race: RaceDefinition
 @export var factions: FactionSystem
 @export var infection_model: CellInfectionModel
@@ -31,7 +33,7 @@ const HIGH_ALERT_LEVEL := 0.7
 const PANIC_SANITY_THRESHOLD := 0.35
 const BLEEDOUT_HEALTH_THRESHOLD := 0.25
 
-# Cached display state for HUD (normalized 0.0–1.0 ranges)
+# Cached display state for HUD (normalized 0.0–1.0)
 var hud_state := {
     "health": 1.0,
     "oxygen": 1.0,
@@ -47,7 +49,7 @@ var hud_state := {
     "is_panicking": false
 }
 
-# Per‑tick telemetry buffer for deeper analysis
+# Per‑tick telemetry buffer
 var last_tick_telemetry: Dictionary = {
     "env_cold": 0.0,
     "env_stress": 0.0,
@@ -63,8 +65,18 @@ var last_tick_telemetry: Dictionary = {
     "oxygen_seconds_after": 999.0
 }
 
+# Optional: aggregated heat from fires / campfires in current area
+var ambient_heat_delta_c_per_sec: float = 0.0
+
 func _ready() -> void:
     add_to_group("runtime")
+
+    if vitality_system == null:
+        vitality_system = PlayerVitalitySystem.new()
+    if pools == null:
+        pools = PlayerPools.new()
+    if suit == null:
+        suit = SuitIntegrity.new()
 
     if race:
         race.apply_to_vitality_system(vitality_system)
@@ -80,7 +92,9 @@ func _ready() -> void:
         "vitality": vitality_system.vitality,
         "max_health": vitality_system.max_health if vitality_system.has_method("max_health") else 0.0,
         "sanity": GameState.player_sanity,
-        "infection": GameState.infection_level
+        "infection": GameState.infection_level,
+        "oxygen_max": vitality_system.oxygen_max,
+        "suit_snapshot": suit.get_debug_snapshot()
     })
 
 func _physics_process(delta: float) -> void:
@@ -102,20 +116,43 @@ func _physics_process(delta: float) -> void:
     last_tick_telemetry["stamina_recovery"] = GameState.stamina_recovery
     last_tick_telemetry["contamination"] = GameState.contamination_level
 
-    # Environment impact: cold, stress, etc.
+    # --- Environment core tick (cold + stress) ---
     vitality_system.tick_environment(delta, env_cold, env_stress)
 
-    # Core metabolic resources
+    # Apply ambient heat from FireNodes / CampfireRemains
+    if ambient_heat_delta_c_per_sec != 0.0:
+        vitality_system.bodytemperature = clampf(
+            vitality_system.bodytemperature + ambient_heat_delta_c_per_sec * delta,
+            vitality_system.bodytemperature_min,
+            vitality_system.bodytemperature_max
+        )
+
+    # --- Core metabolic resources ---
     pools.tick_protein(delta, GameState.travel_load, GameState.awake_load)
 
-    # Oxygen drain – returns true when it hits zero.
-    var oxygen_zero := pools.tick_oxygen(delta, GameState.oxygen_drain_rate)
+    # --- Oxygen drain (environment + suit leaks) ---
+    var base_drain := GameState.oxygen_drain_rate
+    var env_factor := env.oxygen_factor if env else 0.0
+    var oxygen_zero := pools.tick_oxygen_with_suit(delta, base_drain, env_factor, suit)
+
+    DebugLog.log("PlayerVitalitySystem", "OXYGEN_TICK", {
+        "env_state": env.state if env else -1,
+        "env_factor": env_factor,
+        "region_id": GameState.current_region_id,
+        "base_drain": base_drain,
+        "leak_total": suit.get_total_leak(),
+        "suit_snapshot": suit.get_debug_snapshot(),
+        "oxygen": pools.oxygen,
+        "oxygen_max": pools.oxygen_max
+    })
+
     if oxygen_zero and is_alive:
         is_suffocating = true
         GameState.kill_player(&"OXYGEN_ZERO")
         _on_player_death("OXYGEN_ZERO")
+        return
 
-    # Stamina / exertion
+    # --- Stamina / exertion ---
     var collapsed := pools.tick_stamina(delta, GameState.exertion_level, GameState.stamina_recovery)
     if collapsed and is_conscious:
         is_conscious = false
@@ -125,17 +162,18 @@ func _physics_process(delta: float) -> void:
             "exertion": GameState.exertion_level
         })
 
-    # Infection accumulation
-    var inf_delta := infection_model.tick_infection(
-        delta,
-        vitality_system,
-        race,
-        GameState.contamination_level
-    )
-    GameState.infection_level += inf_delta
-    last_tick_telemetry["infection_delta"] = inf_delta
+    # --- Infection accumulation ---
+    if infection_model:
+        var inf_delta := infection_model.tick_infection(
+            delta,
+            vitality_system,
+            race,
+            GameState.contamination_level
+        )
+        GameState.infection_level += inf_delta
+        last_tick_telemetry["infection_delta"] = inf_delta
 
-    # Update flags and HUD representation
+    # --- Update flags + HUD + log ---
     _update_state_flags(delta)
     _sync_hud_from_systems()
     _emit_hud_update()
@@ -147,7 +185,6 @@ func _physics_process(delta: float) -> void:
 # -------------------------------------------------------------------
 
 func _update_state_flags(delta: float) -> void:
-    # Body temperature: derive from vitality_system or pools.
     var body_temp := 37.0
     if vitality_system.has_method("get_body_temperature"):
         body_temp = vitality_system.get_body_temperature()
@@ -162,7 +199,6 @@ func _update_state_flags(delta: float) -> void:
     else:
         time_in_extreme_cold = max(0.0, time_in_extreme_cold - delta * 0.5)
 
-    # Oxygen seconds
     var oxygen_seconds := 999.0
     if pools.has_method("get_oxygen_seconds_remaining"):
         oxygen_seconds = pools.get_oxygen_seconds_remaining()
@@ -174,7 +210,6 @@ func _update_state_flags(delta: float) -> void:
     else:
         time_in_critical_oxygen = max(0.0, time_in_critical_oxygen - delta * 0.5)
 
-    # Health / bleeding derived from pools or vitality.
     var health_ratio := 1.0
     if pools.has_method("get_health_ratio"):
         health_ratio = pools.get_health_ratio()
@@ -184,7 +219,6 @@ func _update_state_flags(delta: float) -> void:
 
     is_bleeding = health_ratio < BLEEDOUT_HEALTH_THRESHOLD
 
-    # Sanity and panic.
     var sanity := GameState.player_sanity
     hud_state["sanity"] = clamp(sanity, 0.0, 1.0)
     is_panicking = sanity <= PANIC_SANITY_THRESHOLD or GameState.alert_level >= HIGH_ALERT_LEVEL
@@ -195,25 +229,20 @@ func _update_state_flags(delta: float) -> void:
         time_in_high_alert = max(0.0, time_in_high_alert - delta * 0.5)
 
 func _sync_hud_from_systems() -> void:
-    # Health
     if pools.has_method("get_health_ratio"):
         hud_state["health"] = clamp(pools.get_health_ratio(), 0.0, 1.0)
     elif vitality_system.has_method("get_health_ratio"):
         hud_state["health"] = clamp(vitality_system.get_health_ratio(), 0.0, 1.0)
 
-    # Oxygen
     if pools.has_method("get_oxygen_ratio"):
         hud_state["oxygen"] = clamp(pools.get_oxygen_ratio(), 0.0, 1.0)
 
-    # Stamina
     if pools.has_method("get_stamina_ratio"):
         hud_state["stamina"] = clamp(pools.get_stamina_ratio(), 0.0, 1.0)
 
-    # Protein / nutrition
     if pools.has_method("get_protein_ratio"):
         hud_state["protein"] = clamp(pools.get_protein_ratio(), 0.0, 1.0)
 
-    # Body temperature normalized 0.0–1.0 from 24–40°C window.
     var body_temp := 37.0
     if vitality_system.has_method("get_body_temperature"):
         body_temp = vitality_system.get_body_temperature()
@@ -221,18 +250,15 @@ func _sync_hud_from_systems() -> void:
         body_temp = pools.body_temperature
     hud_state["body_temp"] = clamp((body_temp - 24.0) / (40.0 - 24.0), 0.0, 1.0)
 
-    # Infection and alert from GameState.
     hud_state["infection"] = clamp(GameState.infection_level, 0.0, 1.0)
     hud_state["alert"] = clamp(GameState.alert_level, 0.0, 1.0)
 
-    # Flags
     hud_state["is_bleeding"] = is_bleeding
     hud_state["is_freezing"] = is_freezing
     hud_state["is_suffocating"] = is_suffocating
     hud_state["is_panicking"] = is_panicking
 
 func _emit_hud_update() -> void:
-    # Broadcast current HUD state to any UI controller in the runtime group.
     get_tree().call_group_flags(
         SceneTree.GROUP_CALL_DEFERRED,
         "runtime",
@@ -241,7 +267,7 @@ func _emit_hud_update() -> void:
     )
 
 # -------------------------------------------------------------------
-# DAMAGE / HEALING HOOKS
+# DAMAGE / HEALING
 # -------------------------------------------------------------------
 
 func apply_damage(amount: float, source: StringName = &"UNKNOWN") -> void:
@@ -303,3 +329,13 @@ func _on_player_death(reason: String) -> void:
         "on_player_death",
         reason
     )
+
+# -------------------------------------------------------------------
+# AMBIENT HEAT FROM FIRES / CAMPFIRES
+# -------------------------------------------------------------------
+
+func apply_fire_heat(heat_c_per_sec: float) -> void:
+    ambient_heat_delta_c_per_sec = heat_c_per_sec
+
+func clear_fire_heat() -> void:
+    ambient_heat_delta_c_per_sec = 0.0
