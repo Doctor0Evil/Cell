@@ -1,0 +1,14 @@
+[gd_resource type="LawDefinition" load_steps=2 format=2]
+[ext_resource path="res://scripts/core/law_definition.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "COSMIC_GOD_OF_CARRION"
+display_name = "God of Carrion"
+description = "A cosmic law watching over the carrion; carnivorous sins draw its attention."
+
+category = "cosmic"
+cosmic_trigger_chance = 0.10
+cosmic_outcome_ids = ["plague_flesh_eater"]
+
+on_crime_events = { "cannibalism": 1.0 }

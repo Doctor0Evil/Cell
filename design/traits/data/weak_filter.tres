@@ -1,0 +1,10 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "weak_filter"
+display_name = "Weak Filter"
+description = "Contaminants take root more easily."
+
+status_rules = { "GLOBAL": { "contaminant_chance_mult": 2.0, "illness_duration_mult": 1.3 } }

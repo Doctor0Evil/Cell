@@ -1,0 +1,12 @@
+[application]
+config/name="CELL"
+run/main_scene="res://scenes/ui/MainMenu.tscn"
+
+[autoload]
+GameState="res://scripts/core/GameState.gd"
+DebugLog="res://scripts/core/DebugLog.gd"
+AssetRegistry="res://scripts/core/asset_registry.gd"
+Factions="res://scripts/core/faction_system.gd"
+CellContentRegistry="res://scripts/core/cell_content_registry.gd"
+HorrorAssets="res://core/horror_asset_registry.gd"
+SaveSystem="res://scripts/core/save_system.gd"

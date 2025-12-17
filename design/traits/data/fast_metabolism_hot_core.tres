@@ -1,0 +1,20 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "fast_metabolism_hot_core"
+display_name = "Fast Metabolism: Hot Core"
+description = "Burns everything faster: heals quick, starves quicker. Suit chems barely catch up."
+
+vitality_delta = 1.0
+tenacity_delta = -0.5
+
+wellness_max_mult = 1.10
+water_decay_mult = 1.25
+stamina_decay_mult = 1.10
+
+status_rules = { "GLOBAL": { "natural_heal_mult": 1.25, "chem_positive_duration_mult": 0.75, "chem_negative_duration_mult": 1.25, "protein_efficiency_mult": 1.10 } }
+
+narrative_tags = ["METABOLIC_OUTLIER", "MEDICAL_INTEREST"]
+respect_deltas = { "MEDIC_ARCHIVE": 5 }

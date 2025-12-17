@@ -1,0 +1,20 @@
+[gd_scene load_steps=2 format=3]
+
+[node name="AmbienceTensionDebug" type="Control"]
+script = ExtResource( 1 )
+
+[node name="HBox" type="HBoxContainer" parent="."]
+
+[node name="Label" type="Label" parent="HBox"]
+text = "Tension"
+
+[node name="TensionSlider" type="HSlider" parent="HBox"]
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.0
+
+[node name="ValueLabel" type="Label" parent="HBox"]
+text = "0.00"
+
+[ext_resource path="res://scripts/debug/ambience_tension_debug.gd" type="Script" id=1]

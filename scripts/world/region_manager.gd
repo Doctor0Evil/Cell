@@ -4,11 +4,13 @@ class_name RegionManager
 
 @export var player_spawn: Node3D
 @export var ambience_controller_path: NodePath
+@export var ambience_player_path: NodePath
 @export var enemy_spawner_root: NodePath
 @export var loot_spawner_root: NodePath
 
 # Cached references
 var _ambience_controller: Node = null
+var _ambience_player: ExtremeHorrorAmbiencePlayer = null
 var _enemy_spawner_root: Node = null
 var _loot_spawner_root: Node = null
 
@@ -33,12 +35,14 @@ func _ready() -> void:
 
     region_id = GameState.current_region_id
     _ambience_controller = get_node_or_null(ambience_controller_path)
+    _ambience_player = get_node_or_null(ambience_player_path)
     _enemy_spawner_root = get_node_or_null(enemy_spawner_root)
     _loot_spawner_root = get_node_or_null(loot_spawner_root)
 
     _load_region_descriptor()
     _spawn_player()
     _apply_region_modifiers()
+    _apply_region_audio_profile()
     _spawn_initial_enemies()
     _spawn_initial_loot()
 
@@ -47,6 +51,24 @@ func _ready() -> void:
         "difficulty": region_difficulty,
         "tags": region_tags.duplicate()
     })
+
+func _apply_region_audio_profile() -> void:
+    if not _ambience_player:
+        return
+
+    # Simple mapping based on difficulty / tags.
+    if region_difficulty <= 1:
+        _ambience_player.switch_ambience("facility_low_hum")
+    elif region_difficulty == 2:
+        _ambience_player.switch_ambience("meat_corridor")
+    elif region_difficulty >= 3:
+        _ambience_player.switch_ambience("reactor_spine")
+
+    # Allow tags to augment ambience choices (e.g., 'vent', 'pursuit_zone')
+    if region_tags.has("vent"):
+        _ambience_player.switch_ambience("vent_draft")
+    if region_tags.has("pursuit_zone"):
+        _ambience_player.switch_ambience("pursuit_static", 2.0)
 
 # -------------------------------------------------------------------
 # REGION DESCRIPTOR

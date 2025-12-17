@@ -1,0 +1,15 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "red_silence_optics"
+display_name = "Red Silence Optics"
+description = "A narrow, clinical focus at range; a blindness at your toes."
+
+logic_delta = 1.0
+instinct_delta = 1.0
+
+status_rules = { "GLOBAL": { "long_range_accuracy_mult": 1.15, "close_range_instab_mult": 0.90 } }
+
+respect_deltas = { "LONG_SPINE_MARKSMEN": 6 }

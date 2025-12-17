@@ -1,0 +1,12 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "ascetic_intake"
+display_name = "Ascetic Intake"
+description = "Less need for rations; also less comfort."
+
+status_rules = { "GLOBAL": { "hunger_decay_mult": 0.5, "thirst_decay_mult": 0.5, "starvation_delay_hours": 24 } }
+
+respect_deltas = { "MONASTIC_HABITATS": 4 }

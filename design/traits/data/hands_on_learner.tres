@@ -1,0 +1,10 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "hands_on_learner"
+display_name = "Hands-On Learner"
+description = "Learning by doing—fast and messy."
+
+status_rules = { "GLOBAL": { "action_xp_bonus_mult": 1.25, "book_xp_penalty_mult": 0.75 } }

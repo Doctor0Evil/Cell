@@ -1,0 +1,20 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "bruiser_frame"
+display_name = "Bruiser Frame"
+description = "Bulk-built for close-quarters. The corridors move slower. The things in them do not."
+
+strength_delta = 2.0
+agility_delta = -1.0
+speed_delta = -0.5
+
+stamina_max_mult = 1.10
+oxygen_decay_mult = 1.05
+
+status_rules = { "COMBAT": { "melee_damage_mult": 1.20, "ranged_stability_mult": 0.90 } }
+
+narrative_tags = ["CLOSE_QUARTERS", "HEAVY_HULL_FRAME"]
+respect_deltas = { "PIT_COMBAT": 8, "TACTICAL_COMMAND": -4 }

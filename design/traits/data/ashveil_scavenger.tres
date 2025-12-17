@@ -1,0 +1,18 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "ashveil_scavenger"
+display_name = "Ashveil Scavenger"
+description = "Reads the dust-storms and solvent rain in Ashveil like signage."
+
+instinct_delta = 1.0
+yield_delta = 1.0
+
+region_tags = ["ASHVEIL_DRIFT"]
+
+status_rules = { "ASHVEIL_DRIFT": { "loot_quantity_mult": 1.20, "rare_scrap_chance_mult": 1.15, "encounter_chance_mult": 1.10, "suit_corrosion_mult": 1.15 } }
+
+narrative_tags = ["SCRAP_ROUTE", "NOISE_INTOLERANT_ZONE"]
+respect_deltas = { "SCAVENGER_RINGS": 10, "FORMAL_SECURITY": -5 }

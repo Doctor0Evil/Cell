@@ -1,0 +1,15 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "trigger_drift"
+display_name = "Trigger Drift"
+description = "Comfort with brittle triggers; small gains, small risks."
+
+instinct_delta = 1.0
+temper_delta = -1.0
+
+status_rules = { "GLOBAL": { "ranged_hit_bonus": 0.05, "oxygen_burst_cost_mult": 1.05, "misfire_chance": 0.03 } }
+
+respect_deltas = { "CHAOTIC_MILITIAS": 5 }

@@ -1,0 +1,15 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "techie"
+display_name = "Techie"
+description = "Knows wires and what they mean."
+
+logic_delta = 1.0
+yield_delta = 1.0
+
+status_rules = { "GLOBAL": { "repair_success_mult": 1.20, "hack_success_mult": 1.15 } }
+
+respect_deltas = { "HULL_TECHS": 6 }

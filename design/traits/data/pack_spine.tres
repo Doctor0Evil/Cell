@@ -1,0 +1,16 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "pack_spine"
+display_name = "Pack Spine"
+description = "Every deck is a cargo deck if your spine doesn’t quit."
+
+strength_delta = 1.0
+stamina_max_mult = 0.95
+
+status_rules = { "GLOBAL": { "carry_capacity_bonus": 0.60, "overload_threshold": 0.75, "overload_speed_mult": 0.90, "overload_oxygen_mult": 1.05 } }
+
+narrative_tags = ["LOADER", "SCAVENGER_HABIT"]
+respect_deltas = { "BULK_LOGISTICS": 10, "MINIMALIST_CELLS": -3 }

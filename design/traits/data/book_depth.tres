@@ -1,0 +1,10 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "book_depth"
+display_name = "Book-Depth"
+description = "Learning from stacks, not from fighting."
+
+status_rules = { "GLOBAL": { "book_xp_bonus_mult": 1.50, "read_time_mult": 1.5 } }

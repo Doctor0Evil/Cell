@@ -1,0 +1,10 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "defender_posture"
+display_name = "Defender Posture"
+description = "You are better when you hold a point and stay there."
+
+status_rules = { "GLOBAL": { "adjacent_ally_dr_bonus": 0.10, "cover_armor_bonus": 3 } }

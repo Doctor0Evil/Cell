@@ -1,0 +1,19 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "iron_lungs_suit"
+display_name = "Iron Lungs"
+description = "Breath comes slower, even when the station doesn’t."
+
+tenacity_delta = 1.0
+oxygen_max_mult = 1.10
+oxygen_decay_mult = 0.80
+
+region_tags = ["LOW_OXYGEN", "TOXIC_ATMOS", "FIRE_SUPPRESSED"]
+
+status_rules = { "LOW_OXYGEN": { "oxygen_decay_mult": 0.75 }, "TOXIC_ATMOS": { "oxygen_decay_mult": 0.80, "poison_inhale_mult": 0.75 }, "FIRE_SUPPRESSED": { "oxygen_decay_mult": 0.70 } }
+
+narrative_tags = ["OXYGEN_SPECIALIST"]
+respect_deltas = { "HULL_TECHS": 10, "FIRESUPPRESSION_TEAMS": 6 }

@@ -33,6 +33,8 @@ var _current_region_config: Dictionary = {}
 
 @onready var _spawn_root: Node3D = $EnemySpawnPoints
 
+@export var debug_enabled: bool = true
+
 var _player: Node3D
 
 func _ready() -> void:
@@ -52,10 +54,13 @@ func _ready() -> void:
 
     _load_region_config()
     _set_hud_objective("Reach the first oxygen cache.")
-    DebugLog.log("MissionColdVergeOxygenRun", "INIT", {
-        "region_id": region_id,
-        "required_capsules_to_extract": required_capsules_to_extract
-    })
+    if debug_enabled:
+        DebugLog.log("MissionColdVergeOxygenRun", "INIT", {
+            "region_id": region_id,
+            "required_capsules_to_extract": required_capsules_to_extract
+        })
+    # Notify HUD / UI
+    get_tree().call_group_flags(SceneTree.GROUP_CALL_DEFERRED, "runtime", "on_mission_init", region_id)
 
 func _bind_triggers() -> void:
     if _start_trigger:
@@ -83,9 +88,11 @@ func _on_start_area_entered(body: Node3D) -> void:
         _cold_timer.start()
         _breather_timer.start()
         _set_hud_objective("Collect oxygen capsules and reach extraction.")
-        DebugLog.log("MissionColdVergeOxygenRun", "MISSION_START", {
-            "region_id": region_id
-        })
+        if debug_enabled:
+            DebugLog.log("MissionColdVergeOxygenRun", "MISSION_START", {
+                "region_id": region_id
+            })
+        get_tree().call_group_flags(SceneTree.GROUP_CALL_DEFERRED, "runtime", "on_mission_started", region_id)
 
 func _on_cache_a_entered(body: Node3D) -> void:
     if not _mission_active or _mission_failed:
@@ -93,7 +100,12 @@ func _on_cache_a_entered(body: Node3D) -> void:
     if body.is_in_group("player"):
         _grant_oxygen_capsule()
         _set_hud_objective("Oxygen cache A secured. Find cache B or head to extraction.")
-        DebugLog.log("MissionColdVergeOxygenRun", "CACHE_A_COLLECTED", {
+        if debug_enabled:
+            DebugLog.log("MissionColdVergeOxygenRun", "CACHE_A_COLLECTED", {
+                "capsules_collected": _capsules_collected
+            })
+        get_tree().call_group_flags(SceneTree.GROUP_CALL_DEFERRED, "runtime", "on_mission_update", {
+            "event": "cache_a_collected",
             "capsules_collected": _capsules_collected
         })
         _cache_a_trigger.monitoring = false
@@ -104,7 +116,12 @@ func _on_cache_b_entered(body: Node3D) -> void:
     if body.is_in_group("player"):
         _grant_oxygen_capsule()
         _set_hud_objective("Oxygen cache B secured. Reach extraction.")
-        DebugLog.log("MissionColdVergeOxygenRun", "CACHE_B_COLLECTED", {
+        if debug_enabled:
+            DebugLog.log("MissionColdVergeOxygenRun", "CACHE_B_COLLECTED", {
+                "capsules_collected": _capsules_collected
+            })
+        get_tree().call_group_flags(SceneTree.GROUP_CALL_DEFERRED, "runtime", "on_mission_update", {
+            "event": "cache_b_collected",
             "capsules_collected": _capsules_collected
         })
         _cache_b_trigger.monitoring = false
@@ -127,7 +144,13 @@ func _on_extraction_entered(body: Node3D) -> void:
         _complete_mission()
     else:
         _set_hud_objective("Extraction locked. Required oxygen caches not secured.")
-        DebugLog.log("MissionColdVergeOxygenRun", "EXTRACTION_DENIED", {
+        if debug_enabled:
+            DebugLog.log("MissionColdVergeOxygenRun", "EXTRACTION_DENIED", {
+                "capsules_collected": _capsules_collected,
+                "required": required_capsules_to_extract
+            })
+        get_tree().call_group_flags(SceneTree.GROUP_CALL_DEFERRED, "runtime", "on_mission_update", {
+            "event": "extraction_denied",
             "capsules_collected": _capsules_collected,
             "required": required_capsules_to_extract
         })
@@ -141,10 +164,14 @@ func _complete_mission() -> void:
 
     GameState.modify_alert(-0.2)
     _set_hud_objective("Mission complete. Oxygen route stabilized.")
-    DebugLog.log("MissionColdVergeOxygenRun", "MISSION_COMPLETE", {
+    if debug_enabled:
+        DebugLog.log("MissionColdVergeOxygenRun", "MISSION_COMPLETE", {
+            "capsules_collected": _capsules_collected
+        })
+    get_tree().call_group_flags(SceneTree.GROUP_CALL_DEFERRED, "runtime", "on_mission_complete", {
+        "region_id": region_id,
         "capsules_collected": _capsules_collected
     })
-    get_tree().call_group("runtime", "on_mission_complete", region_id)
 
 # --- Survival enforcement ticks ---
 
@@ -157,8 +184,13 @@ func _on_oxygen_tick() -> void:
     if survival and survival.has_method("drain_oxygen_seconds"):
         survival.drain_oxygen_seconds(oxygen_drain_per_tick)
         var remaining := survival.get_oxygen_seconds_remaining()
-        DebugLog.log("MissionColdVergeOxygenRun", "OXYGEN_TICK", {
-            "delta_seconds": oxygen_drain_per_tick,
+        if debug_enabled:
+            DebugLog.log("MissionColdVergeOxygenRun", "OXYGEN_TICK", {
+                "delta_seconds": oxygen_drain_per_tick,
+                "remaining": remaining
+            })
+        # Broadcast oxygen remaining every tick for HUD
+        get_tree().call_group_flags(SceneTree.GROUP_CALL_DEFERRED, "runtime", "on_mission_oxygen_tick", {
             "remaining": remaining
         })
         if remaining <= 0.0:
@@ -166,10 +198,11 @@ func _on_oxygen_tick() -> void:
     else:
         # Fallback: apply direct damage if survival system is not present.
         GameState.apply_damage(5)
-        DebugLog.log("MissionColdVergeOxygenRun", "OXYGEN_FALLBACK_DAMAGE", {
-            "damage": 5,
-            "player_health": GameState.player_health
-        })
+        if debug_enabled:
+            DebugLog.log("MissionColdVergeOxygenRun", "OXYGEN_FALLBACK_DAMAGE", {
+                "damage": 5,
+                "player_health": GameState.player_health
+            })
         if GameState.player_health <= 0:
             _fail_mission("Fatal hypoxia.")
 
@@ -180,18 +213,20 @@ func _on_cold_tick() -> void:
     if survival and survival.has_method("apply_cold_exposure"):
         survival.apply_cold_exposure(cold_temp_drop_per_tick)
         var temp := survival.get_body_temperature()
-        DebugLog.log("MissionColdVergeOxygenRun", "COLD_TICK", {
-            "delta_temp": -cold_temp_drop_per_tick,
-            "player_temp": temp
-        })
+        if debug_enabled:
+            DebugLog.log("MissionColdVergeOxygenRun", "COLD_TICK", {
+                "delta_temp": -cold_temp_drop_per_tick,
+                "player_temp": temp
+            })
         if temp <= 28.0:
             _fail_mission("Core temperature collapse.")
     else:
         GameState.apply_damage(4)
-        DebugLog.log("MissionColdVergeOxygenRun", "COLD_FALLBACK_DAMAGE", {
-            "damage": 4,
-            "player_health": GameState.player_health
-        })
+        if debug_enabled:
+            DebugLog.log("MissionColdVergeOxygenRun", "COLD_FALLBACK_DAMAGE", {
+                "damage": 4,
+                "player_health": GameState.player_health
+            })
         if GameState.player_health <= 0:
             _fail_mission("Lethal hypothermia.")
 
@@ -205,10 +240,11 @@ func _fail_mission(reason: String) -> void:
     _breather_timer.stop()
 
     _set_hud_objective("Mission failed: " + reason)
-    DebugLog.log("MissionColdVergeOxygenRun", "MISSION_FAIL", {
-        "reason": reason
-    })
-    get_tree().call_group("runtime", "on_mission_failed", {
+    if debug_enabled:
+        DebugLog.log("MissionColdVergeOxygenRun", "MISSION_FAIL", {
+            "reason": reason
+        })
+    get_tree().call_group_flags(SceneTree.GROUP_CALL_DEFERRED, "runtime", "on_mission_failed", {
         "region_id": region_id,
         "reason": reason
     })
@@ -255,7 +291,13 @@ func _spawn_enemy_in_region(enemy_id: String, position: Vector3) -> void:
     get_tree().current_scene.add_child(enemy_instance)
     enemy_instance.global_transform.origin = position
 
-    DebugLog.log("MissionColdVergeOxygenRun", "ENEMY_SPAWNED", {
+    if debug_enabled:
+        DebugLog.log("MissionColdVergeOxygenRun", "ENEMY_SPAWNED", {
+            "enemy_id": enemy_id,
+            "position": position
+        })
+    get_tree().call_group_flags(SceneTree.GROUP_CALL_DEFERRED, "runtime", "on_mission_update", {
+        "event": "enemy_spawned",
         "enemy_id": enemy_id,
         "position": position
     })

@@ -1,0 +1,15 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "hard_edge"
+display_name = "Hard Edge"
+description = "You know how to hurt people and look like you meant it."
+
+temper_delta = 1.0
+influence_delta = -1.0
+
+status_rules = { "GLOBAL": { "intimidation_bonus": 0.10 } }
+
+respect_deltas = { "BLACK_SECTION_OPERATIVES": 7 }

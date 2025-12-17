@@ -1,0 +1,12 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "chem_reliant"
+display_name = "Chem Reliant"
+description = "The world keeps running if you keep dosing."
+
+status_rules = { "GLOBAL": { "chem_potency_mult": 1.5, "addiction_chance_mult": 2.0 } }
+
+respect_deltas = { "SYNDICATE_DOPERS": 5 }

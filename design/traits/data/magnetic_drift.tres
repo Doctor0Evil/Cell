@@ -1,0 +1,10 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "magnetic_drift"
+display_name = "Magnetic Drift"
+description = "Metal bits don’t stay where you left them."
+
+status_rules = { "GLOBAL": { "metal_pull_chance": 0.20, "metal_detector_noise_mult": 1.1 } }

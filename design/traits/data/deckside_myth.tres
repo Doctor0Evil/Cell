@@ -1,0 +1,14 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "deckside_myth"
+display_name = "Deckside Myth"
+description = "Stories about you move faster than the air recyclers."
+
+influence_delta = 1.0
+status_rules = { "GLOBAL": { "rep_polarization_mult": 1.50 } }
+
+narrative_tags = ["RUMOR_MAGNET"]
+respect_deltas = { "OUTPOST_FRONTLINE": 8, "BLACK_SECTION": 5 }

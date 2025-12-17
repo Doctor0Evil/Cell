@@ -1,0 +1,15 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "containment_cautious"
+display_name = "Containment Cautious"
+description = "Checks the corner twice. Pays attention to seals."
+
+instinct_delta = 1.0
+agility_delta = -1.0
+
+status_rules = { "GLOBAL": { "stealth_vs_sensors_bonus": 0.10, "sprint_start_delay": 0.2 } }
+
+respect_deltas = { "TACTICAL_COMMAND": 5 }

@@ -5,6 +5,9 @@ var current_region_id: StringName = &""
 var player_scene_path: String = "res://scenes/player/Player.tscn"
 var current_profile_id: StringName = &""
 
+# Optional: runtime handle to the global ambience player for test/debug hooks
+var extreme_ambience_player: Node = null
+
 var alert_level: float = 0.0
 var player_sanity: float = 1.0
 var infection_level: float = 0.0

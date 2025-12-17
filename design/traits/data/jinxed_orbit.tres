@@ -1,0 +1,14 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "jinxed_orbit"
+display_name = "Jinxed Orbit"
+description = "Everything is a little more likely to fail around you."
+
+luck_delta = -2.0
+
+status_rules = { "GLOBAL": { "mishap_chance_mult": 1.5 } }
+
+respect_deltas = { "SUPERSTITION_CELLS": -5 }

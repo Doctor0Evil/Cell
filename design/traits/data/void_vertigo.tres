@@ -1,0 +1,12 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "void_vertigo"
+display_name = "Void Vertigo"
+description = "Heights are not an abstract problem."
+
+status_rules = { "EXPOSED_HULL": { "agility_check_penalty": -0.20, "ranged_accuracy_penalty": -0.15 } }
+
+respect_deltas = { "EVA_CREWS": -5 }

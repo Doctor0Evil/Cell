@@ -1,0 +1,10 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "light_sleeper"
+display_name = "Light Sleeper"
+description = "You wake at a whisper. Rest is watchful, not restful."
+
+status_rules = { "REST": { "rest_recovery_mult": 0.90, "sleep_ambush_immunity": true } }

@@ -1,0 +1,15 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "night_shift_mind"
+display_name = "Night Shift Mind"
+description = "The quiet keeps you sharp when lights go down."
+
+logic_delta = 1.0
+instinct_delta = 1.0
+
+status_rules = { "NIGHT_MODE": { "low_light_stealth_bonus": 0.10 } }
+
+respect_deltas = { "NOCTURNAL_CREWS": 6 }

@@ -1,0 +1,18 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "cold_verge_runner"
+display_name = "Cold Verge Runner"
+description = "Knows the frozen ribs of the station well enough to come back."
+
+tenacity_delta = 1.0
+agility_delta = 1.0
+
+region_tags = ["COLD_VERGE", "EXTERIOR_HULL"]
+
+status_rules = { "COLD_VERGE": { "temp_drop_mult": 0.80, "stamina_decay_mult": 0.90, "sprint_cost_mult": 0.90 }, "EXTERIOR_HULL": { "fall_risk_mult": 0.90, "oxygen_decay_mult": 0.95 } }
+
+narrative_tags = ["VERGE_VETERAN"]
+respect_deltas = { "HULL_TECHS": 10, "ASHVEIL_SCAVENGERS": 4 }

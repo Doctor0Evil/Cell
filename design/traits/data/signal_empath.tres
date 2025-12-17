@@ -1,0 +1,16 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "signal_empath"
+display_name = "Signal Empath"
+description = "People and signals bleed straight into your head."
+
+instinct_delta = 1.0
+temper_delta = -1.0
+
+status_rules = { "DIALOG": { "speech_empathy_mult": 1.20, "lie_detection_bonus": 0.15 }, "HORROR_SIGNAL": { "sanity_loss_mult": 1.25 } }
+
+narrative_tags = ["EMPATHIC_HAZARD"]
+respect_deltas = { "WHISPER_ARCHIVE": 5 }

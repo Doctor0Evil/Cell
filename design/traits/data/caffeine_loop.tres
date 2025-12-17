@@ -1,0 +1,16 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "caffeine_loop"
+display_name = "Caffeine Loop"
+description = "The station only feels upright when the stimulants hit."
+
+logic_delta = 0.5
+agility_delta = 0.5
+
+status_rules = { "NO_STIM_6H": { "logic_penalty": -1.0, "instinct_penalty": -1.0, "action_speed_mult": 0.90 }, "ON_STIM": { "agility_bonus": 1.0, "action_speed_mult": 1.10, "duration_hours": 4.0 } }
+
+narrative_tags = ["STIM_HABIT"]
+respect_deltas = { "SHIFT_RATS": 4 }

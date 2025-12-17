@@ -1,0 +1,10 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "static_sheath"
+display_name = "Static Sheath"
+description = "Charge builds; occasionally the station answers back."
+
+status_rules = { "GLOBAL": { "emp_pulse_chance": 0.10, "self_stun_risk": 0.05 } }
