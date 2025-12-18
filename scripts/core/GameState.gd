@@ -7,6 +7,8 @@ var current_profile_id: StringName = &""
 
 # Optional: runtime handle to the global ambience player for test/debug hooks
 var extreme_ambience_player: Node = null
+# Optional: runtime handle to the region-specific 3D ambience controller (e.g., Ashveil)
+var extreme_ambience_controller: Node = null
 
 var alert_level: float = 0.0
 var player_sanity: float = 1.0
@@ -26,6 +28,30 @@ signal player_collapsed(reason: StringName)
 
 func _ready() -> void:
     DebugLog.log("GameState", "READY", {})
+
+    # Handle CLI flags for dev usage when running outside editor.
+    if not Engine.is_editor_hint():
+        _handle_command_line_flags()
+
+func _handle_command_line_flags() -> void:
+    var args := OS.get_cmdline_args()
+    if args.empty():
+        return
+
+    for a in args:
+        match String(a):
+            "--run-tests":
+                DebugLog.log("GameState", "CMDLINE_RUN_TESTS", {"args": args})
+                # Switch to test runner scene and exit when done.
+                get_tree().change_scene_to_file("res://scenes/tests/TestRunner.tscn")
+                return
+            "--dev-harness":
+                DebugLog.log("GameState", "CMDLINE_DEV_HARNESS", {"args": args})
+                get_tree().change_scene_to_file("res://scenes/debug/DevHarness.tscn")
+                return
+            _:
+                # Ignore other flags for now.
+                pass
 
 func reset_for_new_run() -> void:
     alert_level = 0.0
@@ -73,3 +99,8 @@ func on_player_collapse(reason: StringName) -> void:
     DebugLog.log("GameState", "PLAYER_COLLAPSE", {"reason": String(reason)})
     player_collapsed.emit(reason)
     get_tree().call_group("runtime", "on_player_collapsed", reason)
+
+# Minimal game-time helper for simulations (minutes since epoch).
+func get_game_minutes() -> float:
+    return float(Time.get_unix_time_from_system()) / 60.0
+

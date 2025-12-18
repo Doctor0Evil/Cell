@@ -215,31 +215,42 @@ func tick_stamina(delta: float, exertion: float, base_recovery: float) -> bool:
     return false
 
 # ========================
-#  Oxygen capsules / ration-chips
+#  Oxygen consumption helpers
 # ========================
 
+# Suit oxygen capacity in Standard Liters (SL). Equip systems can override this at runtime.
+@export var suit_oxygen_capacity_sl: float = 600.0
+
+# Deprecated legacy capsule API — prefer `use_lox_bottle(sl_amount)` for LOX bottles.
 func use_oxygen_capsule(strength: float) -> void:
-    # Brutal but useful: more oxygen, but long-term strain.
+    # Brutal but useful: more oxygen, but long-term strain (legacy capsule behaviour).
     var factor := clamp(0.8 + yield * 0.05, 0.8, 1.8)
     oxygen = min(oxygen_max, oxygen + strength * factor)
     wellness = max(0.0, wellness - 2.0)
     vitality = max(0.0, vitality - 0.05)
     temper = max(0.0, temper - 0.05)
 
-func apply_ration_chip_tier(tier: int) -> void:
-    var factor := 0.15 + yield * 0.03
-    match tier:
-        1:
-            vitality = min(10.0, vitality + factor)
-            constitution = min(10.0, constitution + factor)
-            protein = min(protein_max, protein + 5.0)
-        2:
-            agility = min(10.0, agility + factor)
-            speed = min(10.0, speed + factor)
-            dexterity = min(10.0, dexterity + factor * 0.8)
-        3:
-            logic = min(10.0, logic + factor)
-            intelligence = min(10.0, intelligence + factor)
-            yield = min(10.0, yield + factor * 0.8)
+func use_oxygen_bottle(sl_amount: float) -> void:
+    # LOX bottles supply Standard Liters (SL). Convert SL -> player oxygen units via current suit capacity.
+    if sl_amount <= 0.0:
+        return
+    var fraction := clamp(sl_amount / max(1.0, suit_oxygen_capacity_sl), 0.0, 1.0)
+    var oxy_add := fraction * oxygen_max
+    oxygen = min(oxygen_max, oxygen + oxy_add)
 
-    recalc_maxima()
+    # Small, realistic strain on systems: warmer handling, minor wellness/vitality hits.
+    wellness = max(0.0, wellness - 1.0 * fraction)
+    vitality = max(0.0, vitality - 0.01 * fraction)
+
+    # Logically, a larger refill causes more suit stress; emergency bottles have higher penalty.
+    # (Per-item tags/effects can be used to apply more complex side-effects.)
+    DebugLog.log("PlayerVitality", "USE_LOX_BOTTLE", {
+        "sl_amount": sl_amount,
+        "oxy_added": oxy_add,
+        "remaining_oxygen": oxygen
+    })
+
+func use_lox_bottle(sl_amount: float) -> void:
+	# New preferred name for LOX usage API; delegates to existing implementation.
+	use_oxygen_bottle(sl_amount)
+	DebugLog.log("PlayerVitality", "ALIAS", {"alias": "use_lox_bottle", "delegated_to": "use_oxygen_bottle", "sl_amount": sl_amount})

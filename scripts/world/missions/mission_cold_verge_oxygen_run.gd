@@ -87,7 +87,7 @@ func _on_start_area_entered(body: Node3D) -> void:
         _oxygen_timer.start()
         _cold_timer.start()
         _breather_timer.start()
-        _set_hud_objective("Collect oxygen capsules and reach extraction.")
+        _set_hud_objective("Collect LOX bottles and reach extraction.")
         if debug_enabled:
             DebugLog.log("MissionColdVergeOxygenRun", "MISSION_START", {
                 "region_id": region_id
@@ -98,7 +98,7 @@ func _on_cache_a_entered(body: Node3D) -> void:
     if not _mission_active or _mission_failed:
         return
     if body.is_in_group("player"):
-        _grant_oxygen_capsule()
+        _grant_lox_bottle()
         _set_hud_objective("Oxygen cache A secured. Find cache B or head to extraction.")
         if debug_enabled:
             DebugLog.log("MissionColdVergeOxygenRun", "CACHE_A_COLLECTED", {
@@ -114,7 +114,7 @@ func _on_cache_b_entered(body: Node3D) -> void:
     if not _mission_active or _mission_failed:
         return
     if body.is_in_group("player"):
-        _grant_oxygen_capsule()
+        _grant_lox_bottle()
         _set_hud_objective("Oxygen cache B secured. Reach extraction.")
         if debug_enabled:
             DebugLog.log("MissionColdVergeOxygenRun", "CACHE_B_COLLECTED", {
@@ -126,10 +126,10 @@ func _on_cache_b_entered(body: Node3D) -> void:
         })
         _cache_b_trigger.monitoring = false
 
-func _grant_oxygen_capsule() -> void:
+func _grant_lox_bottle() -> void:
     _capsules_collected += 1
     GameState.inventory.append({
-        "id": "OXYGEN_CAPSULE",
+        "id": "CON_LOX_CRYO_CORE_STD",
         "stack": 1
     })
     # Optional: flash HUD indicator through a global UI event group.

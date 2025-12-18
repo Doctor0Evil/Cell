@@ -86,7 +86,11 @@ func use_item(slot_index: int) -> void:
 
     if def.oxygen_delta != 0.0:
         if def.oxygen_delta > 0.0:
-            vitality_system.use_oxygencapsule(def.oxygen_delta)
+            # LOX bottles supply Standard Liters; detect via tag and route to bottle handler
+            if "LOX_BOTTLE" in def.tags:
+                vitality_system.use_lox_bottle(def.oxygen_delta)
+            else:
+                vitality_system.use_oxygencapsule(def.oxygen_delta)
         else:
             vitality_system.oxygen = max(0.0, vitality_system.oxygen + def.oxygen_delta)
 

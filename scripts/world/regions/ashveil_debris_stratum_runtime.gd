@@ -2,6 +2,7 @@ extends Node3D
 class_name AshveilDebrisStratumRuntime
 
 @export var ambience_player_path: NodePath
+@export var ambience_controller_3d_path: NodePath
 @export var tilemap_floor_path: NodePath
 @export var tilemap_walls_path: NodePath
 
@@ -29,16 +30,36 @@ func _ready() -> void:
         GameState.current_region_cold = temp
         GameState.current_region_stress = oxy
 
+    # Initialize the optional 3D ambience controller if present
+    var ambience_controller_3d := (ambience_controller_3d_path and not ambience_controller_3d_path.is_empty()) ? get_node_or_null(ambience_controller_3d_path) : (has_node("AmbienceController3D") ? $AmbienceController3D : null)
+    if ambience_controller_3d == null:
+        for child in get_children():
+            if child is AshveilAmbience3DController:
+                ambience_controller_3d = child
+                break
+    if ambience_controller_3d:
+        GameState.extreme_ambience_controller = ambience_controller_3d
+        ambience_controller_3d.region_id = &"ASHVEIL_DEBRIS_STRATUM"
+        if ambience_controller_3d.has_method("apply_region_profile"):
+            ambience_controller_3d.apply_region_profile(region_def, int(region_def.get("difficulty", 1)))
+        if ambience_controller_3d.has_method("start_ambience"):
+            ambience_controller_3d.start_ambience()
+
     DebugLog.log("AshveilRuntime", "READY", {
         "region": GameState.current_region_id,
-        "ambience_player": ambience_player != null
+        "ambience_player": ambience_player != null,
+        "ambience_controller_3d": ambience_controller_3d != null
     })
 
 # Hook for external systems to bump ambience (e.g., on detection)
 func trigger_pursuit() -> void:
     if ambience_player:
         ambience_player.switch_ambience("pursuit_static", 2.0)
+    if GameState.extreme_ambience_controller and GameState.extreme_ambience_controller.has_method("trigger_evac_memory_event"):
+        GameState.extreme_ambience_controller.trigger_evac_memory_event()
 
 func trigger_signal_flood() -> void:
     if ambience_player:
         ambience_player.switch_ambience("signal_flood", 3.0)
+    if GameState.extreme_ambience_controller and GameState.extreme_ambience_controller.has_method("trigger_evac_memory_event"):
+        GameState.extreme_ambience_controller.trigger_evac_memory_event()

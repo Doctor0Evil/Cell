@@ -16,9 +16,38 @@ transform = Transform3D( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0 )
 [node name="AmbiencePlayer" type="Node" parent="."]
 script = ExtResource( 2 )
 
+[node name="AmbienceController3D" type="Node3D" parent="."]
+script = ExtResource( 4 )
+base_player = NodePath("AmbienceController3D/BasePlayer")
+mid_players = [ NodePath("AmbienceController3D/MidPlayer1"), NodePath("AmbienceController3D/MidPlayer2") ]
+event_players = [ NodePath("AmbienceController3D/EventPlayer1") ]
+collapse_players = [ NodePath("AmbienceController3D/CollapsePlayer1") ]
+
+[node name="BasePlayer" type="AudioStreamPlayer3D" parent="AmbienceController3D"]
+bus = "AshveilBase"
+autoplay = false
+
+[node name="MidPlayer1" type="AudioStreamPlayer3D" parent="AmbienceController3D"]
+bus = "AshveilMid"
+autoplay = false
+
+[node name="MidPlayer2" type="AudioStreamPlayer3D" parent="AmbienceController3D"]
+bus = "AshveilMid"
+autoplay = false
+
+[node name="EventPlayer1" type="AudioStreamPlayer3D" parent="AmbienceController3D"]
+bus = "AshveilEvent"
+autoplay = false
+
+[node name="CollapsePlayer1" type="AudioStreamPlayer3D" parent="AmbienceController3D"]
+bus = "AshveilCollapse"
+autoplay = false
+
 [node name="RegionRuntime" type="Node3D" parent="."]
 script = ExtResource( 3 )
+ambience_controller_3d_path = NodePath("AmbienceController3D")
 
 [ext_resource path="res://scripts/world/region_manager.gd" type="Script" id=1]
 [ext_resource path="res://audio/ambient/extreme_horror_ambience_player.gd" type="Script" id=2]
 [ext_resource path="res://scripts/world/regions/ashveil_debris_stratum_runtime.gd" type="Script" id=3]
+[ext_resource path="res://scripts/world/ashveil_ambience_3d_controller.gd" type="Script" id=4]

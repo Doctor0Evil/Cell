@@ -36,7 +36,7 @@ var regions := {
         "temperature_modifier": -0.5,
         "oxygen_modifier": -0.1,
         "primary_threats": ["SPINE_CRAWLER", "BREATHER"],
-        "key_loot": ["OXYGEN_CAPSULE", "HEAT_CORE_FRAGMENT", "RATION_CHIP_TIER_I"],
+        "key_loot": ["CON_LOX_CRYO_CORE_STD", "HEAT_CORE_FRAGMENT", "RATION_CHIP_TIER_I"],
         "scene_path": "res://scenes/world/ashveil_debris_stratum.tscn"
     },
     "IRON_HOLLOW_SPINAL_TRENCH": {
@@ -54,7 +54,7 @@ var regions := {
         "temperature_modifier": -1.0,
         "oxygen_modifier": -0.3,
         "primary_threats": ["BREATHER", "ASH_EATER", "PULSE_TERROR"],
-        "key_loot": ["OXYGEN_CAPSULE", "SUIT_UPGRADE_COLD", "RATION_CHIP_TIER_III"],
+        "key_loot": ["CON_LOX_CRYO_CORE_STD", "SUIT_UPGRADE_COLD", "RATION_CHIP_TIER_III"],
         "scene_path": "res://scenes/world/cold_verge_cryo_rim.tscn"
     },
     "RED_SILENCE_SIGNAL_CRADLE": {

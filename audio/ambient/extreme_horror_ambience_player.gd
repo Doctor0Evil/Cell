@@ -78,8 +78,89 @@ func _glitch_pulse(delta_db: float, duration: float) -> void:
     _tween.tween_property(self, "volume_db", mid_db, duration * 0.5)
     _tween.tween_property(self, "volume_db", target_volume_db, duration * 0.5)
 
-# Public API ---------------------------------------------------------
+# Layered loops and one-shot stingers
+var _loop_players: Dictionary = {} # id -> AudioStreamPlayer
+var _layer_weights: Dictionary = {} # id -> float (0..1)
+var _stinger_streams: Dictionary = {} # id -> AudioStream
+var _target_tension_override: float = -1.0
+var _world_tension_bias: float = 0.0
 
+func get_base_tension() -> float:
+    return (_intensity_min + _intensity_max) * 0.5
+
+func set_target_tension(value: float) -> void:
+    _target_tension_override = clamp(value, 0.0, 1.0)
+
+func set_world_tension_bias(value: float) -> void:
+    _world_tension_bias = clamp(value, -1.0, 1.0)
+
+# Register loop by id and stream path (path optional if using LicenseAwareAssetRegistry)
+func register_loop(id: StringName, path_or_asset: String) -> void:
+    var stream: AudioStream = null
+    if ResourceLoader.exists(path_or_asset):
+        stream = ResourceLoader.load(path_or_asset)
+    else:
+        # Try license-aware registry
+        stream = LicenseAwareAssetRegistry.get_asset(String(path_or_asset)) if LicenseAwareAssetRegistry else null
+    if stream == null:
+        DebugLog.log("ExtremeHorrorAmbiencePlayer", "REGISTER_LOOP_FAILED", {"id": id, "path": path_or_asset})
+        return
+    var player := AudioStreamPlayer.new()
+    player.stream = stream
+    player.bus = audio_bus
+    player.volume_db = -80.0
+    player.autoplay = false
+    player.name = "Loop_%s" % id
+    add_child(player)
+    player.play()
+    _loop_players[id] = player
+    _layer_weights[id] = 0.0
+
+func register_stinger(id: StringName, path_or_asset: String) -> void:
+    var stream: AudioStream = null
+    if ResourceLoader.exists(path_or_asset):
+        stream = ResourceLoader.load(path_or_asset)
+    else:
+        stream = LicenseAwareAssetRegistry.get_asset(String(path_or_asset)) if LicenseAwareAssetRegistry else null
+    if stream == null:
+        DebugLog.log("ExtremeHorrorAmbiencePlayer", "REGISTER_STINGER_FAILED", {"id": id, "path": path_or_asset})
+        return
+    _stinger_streams[id] = stream
+
+func set_layer_weight(id: StringName, weight: float) -> void:
+    weight = clamp(weight, 0.0, 1.0)
+    _layer_weights[id] = weight
+    if _loop_players.has(id):
+        var p: AudioStreamPlayer = _loop_players[id]
+        # map weight -> volume between -80 and target_volume_db
+        var db := lerp(-80.0, target_volume_db, weight)
+        p.volume_db = db
+
+func play_stinger(id: StringName) -> void:
+    if not _stinger_streams.has(id):
+        return
+    var stream := _stinger_streams[id]
+    var p := AudioStreamPlayer.new()
+    p.stream = stream
+    p.bus = audio_bus
+    p.autoplay = false
+    add_child(p)
+    p.play()
+    # cleanup when done
+    p.connect("finished", Callable(p, "queue_free"))
+
+# Overriding process to consider target/world tension if set
+func _process(delta: float) -> void:
+    var tension := 0.0
+    if _debug_tension_override >= 0.0 and _debug_tension_override <= 1.0:
+        tension = clamp(_debug_tension_override, 0.0, 1.0)
+    elif _target_tension_override >= 0.0:
+        tension = clamp(_target_tension_override + _world_tension_bias, 0.0, 1.0)
+    else:
+        tension = clamp(GameState.alert_level + (1.0 - GameState.player_sanity) + _world_tension_bias, 0.0, 1.0)
+    _apply_tension_to_playback(tension)
+
+# Existing switch_ambience still works for single-track style ambience
 func switch_ambience(ambience_id: String, crossfade_time: float = 4.0) -> void:
     if ambience_id == _current_id:
         return
@@ -102,7 +183,6 @@ func switch_ambience(ambience_id: String, crossfade_time: float = 4.0) -> void:
         _tween.kill()
     _tween = get_tree().create_tween()
 
-    # Fade out, swap stream, fade in.
     _tween.tween_property(self, "volume_db", -80.0, crossfade_time * 0.5)
     _tween.tween_callback(Callable(self, "_on_faded_out").bind(new_stream))
     _tween.tween_property(self, "volume_db", target_volume_db, crossfade_time * 0.5)

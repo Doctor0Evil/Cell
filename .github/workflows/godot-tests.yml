@@ -1,0 +1,60 @@
+name: Godot LOX & Survival Tests
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  godot-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Godot 4
+        uses: firebelley/setup-godot@v1
+        with:
+          version: '4.2.1'
+          use-dotnet: false
+
+      - name: Run TestRunner scene (headless)
+        run: |
+          godot4 --headless --quiet --path . \
+            --quit --run res://scenes/tests/TestRunner.tscn \
+            > godot-test-output.log 2>&1
+
+      - name: Show test summary on failure
+        if: failure()
+        run: |
+          echo "----- CELL Test Summary (test_results.json) -----"
+          if [ -f res/logs/test_results.json ]; then
+            cat res/logs/test_results.json
+          else
+            echo "No test_results.json found."
+          fi
+          echo "----- End of Test Summary -----"
+
+      - name: Show Godot log tail on failure
+        if: failure()
+        run: |
+          echo "----- CELL Godot Test Output (tail) -----"
+          if [ -f godot-test-output.log ]; then
+            tail -n 80 godot-test-output.log
+          else
+            echo "No godot-test-output.log found."
+          fi
+          echo "----- End of Godot Test Output -----"
+
+      - name: Upload Godot test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-test-logs
+          path: |
+            res/logs/test_results.json
+            res/logs/
+            godot-test-output.log
+            project.godot

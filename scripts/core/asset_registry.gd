@@ -6,6 +6,15 @@ class_name AssetRegistry
 var _by_id: Dictionary = {}
 
 func _ready() -> void:
+    # Ensure the runtime database has default assets populated (meds, LOX bottles, etc.).
+    if not database:
+        # Create an in-memory database if one was not assigned in the editor.
+        database = AssetDatabase.new()
+        DebugLog.log("AssetRegistry", "DATABASE_CREATED_AT_RUNTIME", {})
+
+    if database and database.has_method("load_default_assets"):
+        database.load_default_assets()
+
     _build_index()
 
 func _build_index() -> void:

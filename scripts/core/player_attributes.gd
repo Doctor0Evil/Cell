@@ -70,10 +70,14 @@ func apply_ration_chip_tier(tier: int) -> void:
             intelligence = min(10.0, intelligence + 0.5 * factor)
             strength = min(10.0, strength + 0.4 * factor)
 
+func apply_lox_bottle_effect() -> void:
+	# LOX bottle side-effects: small efficiency bump but minor system stress.
+	yield = min(10.0, yield + 0.2)
+	tenacity = min(10.0, tenacity + 0.1)
+	vitality = max(0.0, vitality - 0.05)
+	temper = max(0.0, temper - 0.05)
+
 func apply_oxygen_capsule_effect() -> void:
-    # Capsules are powerful but dangerous: improve oxygen efficiency short-term,
-    # slightly stress vitality and temper (long-term side effects).
-    yield = min(10.0, yield + 0.2)
-    tenacity = min(10.0, tenacity + 0.1)
-    vitality = max(0.0, vitality - 0.05)
-    temper = max(0.0, temper - 0.05)
+	# Deprecated compatibility wrapper; use apply_lox_bottle_effect instead.
+	DebugLog.log("PlayerAttributes", "DEPRECATION", {"deprecated": "apply_oxygen_capsule_effect", "recommended": "apply_lox_bottle_effect"})
+	apply_lox_bottle_effect()

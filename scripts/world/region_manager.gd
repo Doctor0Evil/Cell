@@ -224,7 +224,7 @@ func _spawn_initial_loot() -> void:
         return
 
     # loot_spawn_table entry example:
-    # { "id": "OXYGEN_CAPSULE", "min": 1, "max": 3, "group": "oxygen_cache" }
+    # { "id": "CON_LOX_CRYO_CORE_STD", "min": 1, "max": 3, "group": "oxygen_cache" }
     for entry in loot_spawn_table:
         var item_id := String(entry.get("id", ""))
         var min_count := int(entry.get("min", 0))
