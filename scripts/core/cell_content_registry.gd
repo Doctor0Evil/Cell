@@ -1,5 +1,8 @@
-extends Resource
+extends Node
 class_name CellContentRegistry
+
+# Note: This is intended to be an autoload (singleton). Extending Node ensures
+# it can be registered in Project Settings -> AutoLoad and used as an instance.
 
 # This Resource can be saved as `res://config/cell_content_registry.tres`
 # and loaded by autoloads or scene managers.

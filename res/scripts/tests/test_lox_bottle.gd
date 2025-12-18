@@ -71,7 +71,7 @@ func _test_inventory_use_lox() -> void:
 	var expected_add := expected_fraction * vit.oxygen_max
 	var expected_final := min(vit.oxygen_max, before_oxy + expected_add)
 
-	if not is_equal_approx(vit.oxygen, expected_final, 0.0001):
+	if abs(vit.oxygen - expected_final) > 0.0001:
 		_fail("Oxygen not increased as expected (got %s, expected %s)" % [vit.oxygen, expected_final])
 
 	# Stack decremented -> slot cleared
@@ -97,7 +97,7 @@ func _test_alias_and_deprecation_behavior() -> void:
 	vit.use_oxygen_bottle(160.0)
 	var after_oxy := vit.oxygen
 
-	if not is_equal_approx(after_lox, after_oxy, 0.0001):
+	if abs(after_lox - after_oxy) > 0.0001:
 		_fail("use_lox_bottle and use_oxygen_bottle produced different oxygen values: %s vs %s" % [after_lox, after_oxy])
 
 	# Test apply_lox_bottle vs deprecated apply_oxygen_capsule on PlayerPools
@@ -109,7 +109,7 @@ func _test_alias_and_deprecation_behavior() -> void:
 	pools.apply_oxygen_capsule(160.0) # deprecated wrapper
 	var after_apply_capsule := vit.oxygen
 
-	if not is_equal_approx(after_apply_lox, after_apply_capsule, 0.0001):
+	if abs(after_apply_lox - after_apply_capsule) > 0.0001:
 		_fail("apply_lox_bottle and apply_oxygen_capsule produced different results")
 
 func _test_mission_grant_wiring() -> void:

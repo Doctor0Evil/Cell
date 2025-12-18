@@ -4,6 +4,7 @@ class_name GameState
 var current_region_id: StringName = &""
 var player_scene_path: String = "res://scenes/player/Player.tscn"
 var current_profile_id: StringName = &""
+var inventory: Array = []
 
 # Optional: runtime handle to the global ambience player for test/debug hooks
 var extreme_ambience_player: Node = null
@@ -35,7 +36,7 @@ func _ready() -> void:
 
 func _handle_command_line_flags() -> void:
     var args := OS.get_cmdline_args()
-    if args.empty():
+    if args.is_empty():
         return
 
     for a in args:

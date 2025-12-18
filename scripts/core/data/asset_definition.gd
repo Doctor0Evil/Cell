@@ -18,7 +18,7 @@ class_name AssetDefinition
 
 # Visual bindings
 @export_file("*.tscn") var world_scene_path: String = ""
-@export_file("*.png,*.tres") var icon_path: String = ""
+@export_file("*.png", "*.tres") var icon_path: String = ""
 
 # Audio bindings
 @export var pickup_sfx_id: StringName = &""
