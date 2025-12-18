@@ -80,7 +80,7 @@ func _create_law_tres(dict: Dictionary) -> bool:
     res.cosmic_outcome_ids = dict.get("cosmic_outcome_ids", [])
 
     # Save resource
-    var err := ResourceSaver.save(path, res)
+    var err := ResourceSaver.save(res, path)
     if err != OK:
         printerr("LawImporter: failed saving %s (err %s)" % [path, str(err)])
         return false

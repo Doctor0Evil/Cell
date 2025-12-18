@@ -46,7 +46,7 @@ func _process_manifest(path: String) -> void:
 	var coll_dir := "res://assets/tilesets/collisions"
 	var da := DirAccess.open(coll_dir)
 	if da == null:
-		DirAccess.make_dir_recursive(coll_dir)
+		DirAccess.make_dir_recursive_absolute(coll_dir)
 
 	for t in tiles:
 		var coords := t.get("atlas_coords", [])
@@ -89,7 +89,7 @@ func _process_manifest(path: String) -> void:
 			body.add_child(cs)
 			scene.add_child(body)
 			var out_scene_path := "%s/%s_tile_%d_%d.tscn" % [coll_dir, png_path.get_file().get_basename(), rx, ry]
-			ResourceSaver.save(out_scene_path, scene)
+		ResourceSaver.save(scene, out_scene_path)
 			print("Wrote collision scene: %s" % out_scene_path)
 			# Optionally write a small metadata file linking this collision to the tileset tile
 			var meta := {"tileset": ts_res_path, "atlas_coords": [rx, ry], "collision_scene": out_scene_path}

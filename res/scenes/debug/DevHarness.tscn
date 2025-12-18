@@ -19,6 +19,242 @@ text = "Water: N/A"
 [node name="FlagsLabel" type="Label" parent="VBox"]
 text = "Flags: N/A"
 
+[node name="LorewayProfileLabel" type="Label" parent="VBox"]
+text = "LorewayProfile: (loading...)"
+autowrap = true
+rect_min_size = Vector2(400, 80)
+
+[node name="LorewayControlsScroll" type="ScrollContainer" parent="VBox"]
+rect_min_size = Vector2(400, 220)
+
+[node name="LorewayControls" type="VBoxContainer" parent="VBox/LorewayControlsScroll"]
+
+[node name="BrutalityHeader" type="Label" parent="VBox/LorewayControls"]
+text = "Brutality"
+
+[node name="BrutalityGlobal" type="HBoxContainer" parent="VBox/LorewayControls"]
+rect_min_size = Vector2(400, 24)
+
+[node name="LabelGlobal" type="Label" parent="VBox/LorewayControls/BrutalityGlobal"]
+text = "Global"
+
+[node name="GlobalSlider" type="HSlider" parent="VBox/LorewayControls/BrutalityGlobal"]
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.85
+size_flags_horizontal = 3
+
+[node name="BrutalityPhysical" type="HBoxContainer" parent="VBox/LorewayControls"]
+rect_min_size = Vector2(400, 24)
+
+[node name="LabelPhysical" type="Label" parent="VBox/LorewayControls/BrutalityPhysical"]
+text = "Physical"
+
+[node name="PhysicalSlider" type="HSlider" parent="VBox/LorewayControls/BrutalityPhysical"]
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.80
+size_flags_horizontal = 3
+
+[node name="BrutalityPsych" type="HBoxContainer" parent="VBox/LorewayControls"]
+rect_min_size = Vector2(400, 24)
+
+[node name="LabelPsych" type="Label" parent="VBox/LorewayControls/BrutalityPsych"]
+text = "Psychological"
+
+[node name="PsychSlider" type="HSlider" parent="VBox/LorewayControls/BrutalityPsych"]
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.95
+size_flags_horizontal = 3
+
+[node name="BrutalitySocial" type="HBoxContainer" parent="VBox/LorewayControls"]
+rect_min_size = Vector2(400, 24)
+
+[node name="LabelSocial" type="Label" parent="VBox/LorewayControls/BrutalitySocial"]
+text = "Social"
+
+[node name="SocialSlider" type="HSlider" parent="VBox/LorewayControls/BrutalitySocial"]
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.90
+size_flags_horizontal = 3
+
+[node name="HorrorHeader" type="Label" parent="VBox/LorewayControls"]
+text = "Horror"
+
+[node name="HorrorDread" type="HBoxContainer" parent="VBox/LorewayControls"]
+rect_min_size = Vector2(400, 24)
+
+[node name="LabelDread" type="Label" parent="VBox/LorewayControls/HorrorDread"]
+text = "Dread"
+
+[node name="DreadSlider" type="HSlider" parent="VBox/LorewayControls/HorrorDread"]
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.95
+size_flags_horizontal = 3
+
+[node name="HorrorShock" type="HBoxContainer" parent="VBox/LorewayControls"]
+rect_min_size = Vector2(400, 24)
+
+[node name="LabelShock" type="Label" parent="VBox/LorewayControls/HorrorShock"]
+text = "Shock"
+
+[node name="ShockSlider" type="HSlider" parent="VBox/LorewayControls/HorrorShock"]
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.80
+size_flags_horizontal = 3
+
+[node name="HorrorDisgust" type="HBoxContainer" parent="VBox/LorewayControls"]
+rect_min_size = Vector2(400, 24)
+
+[node name="LabelDisgust" type="Label" parent="VBox/LorewayControls/HorrorDisgust"]
+text = "Disgust"
+
+[node name="DisgustSlider" type="HSlider" parent="VBox/LorewayControls/HorrorDisgust"]
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.75
+size_flags_horizontal = 3
+
+[node name="HorrorUncanny" type="HBoxContainer" parent="VBox/LorewayControls"]
+rect_min_size = Vector2(400, 24)
+
+[node name="LabelUncanny" type="Label" parent="VBox/LorewayControls/HorrorUncanny"]
+text = "Uncanny"
+
+[node name="UncannySlider" type="HSlider" parent="VBox/LorewayControls/HorrorUncanny"]
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.85
+size_flags_horizontal = 3
+
+[node name="HorrorMoral" type="HBoxContainer" parent="VBox/LorewayControls"]
+rect_min_size = Vector2(400, 24)
+
+[node name="LabelMoral" type="Label" parent="VBox/LorewayControls/HorrorMoral"]
+text = "Moral Anxiety"
+
+[node name="MoralSlider" type="HSlider" parent="VBox/LorewayControls/HorrorMoral"]
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 1.00
+size_flags_horizontal = 3
+
+[node name="TemperaturesHeader" type="Label" parent="VBox/LorewayControls"]
+text = "Temperatures"
+
+[node name="TempSurreal" type="HBoxContainer" parent="VBox/LorewayControls"]
+rect_min_size = Vector2(400, 24)
+
+[node name="LabelSurreal" type="Label" parent="VBox/LorewayControls/TempSurreal"]
+text = "Surreal"
+
+[node name="SurrealSlider" type="HSlider" parent="VBox/LorewayControls/TempSurreal"]
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.55
+size_flags_horizontal = 3
+
+[node name="TempNarrative" type="HBoxContainer" parent="VBox/LorewayControls"]
+rect_min_size = Vector2(400, 24)
+
+[node name="LabelNarrative" type="Label" parent="VBox/LorewayControls/TempNarrative"]
+text = "Narrative"
+
+[node name="NarrativeSlider" type="HSlider" parent="VBox/LorewayControls/TempNarrative"]
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.70
+size_flags_horizontal = 3
+
+[node name="TempHorror" type="HBoxContainer" parent="VBox/LorewayControls"]
+rect_min_size = Vector2(400, 24)
+
+[node name="LabelHorrorTemp" type="Label" parent="VBox/LorewayControls/TempHorror"]
+text = "Horror Temp"
+
+[node name="HorrorTempSlider" type="HSlider" parent="VBox/LorewayControls/TempHorror"]
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.80
+size_flags_horizontal = 3
+
+[node name="SlavicHeader" type="Label" parent="VBox/LorewayControls"]
+text = "Slavic Tone"
+
+[node name="SlavicRural" type="HBoxContainer" parent="VBox/LorewayControls"]
+rect_min_size = Vector2(400, 24)
+
+[node name="LabelRural" type="Label" parent="VBox/LorewayControls/SlavicRural"]
+text = "Rural Decay"
+
+[node name="RuralSlider" type="HSlider" parent="VBox/LorewayControls/SlavicRural"]
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.95
+size_flags_horizontal = 3
+
+[node name="SlavicBureau" type="HBoxContainer" parent="VBox/LorewayControls"]
+rect_min_size = Vector2(400, 24)
+
+[node name="LabelBureau" type="Label" parent="VBox/LorewayControls/SlavicBureau"]
+text = "Bureaucratic Horror"
+
+[node name="BureauSlider" type="HSlider" parent="VBox/LorewayControls/SlavicBureau"]
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.90
+size_flags_horizontal = 3
+
+[node name="LorewayControlsReset" type="HBoxContainer" parent="VBox/LorewayControls"]
+rect_min_size = Vector2(400, 28)
+
+[node name="ResetButton" type="Button" parent="VBox/LorewayControls/LorewayControlsReset"]
+text = "Reset Profile"
+
+[node name="CandidatesLabel" type="Label" parent="VBox"]
+text = "Candidates: Default"
+
+[node name="CandidateSetSelector" type="OptionButton" parent="VBox"]
+
+[node name="ApplyCandidatesButton" type="Button" parent="VBox"]
+text = "Apply Candidates"
+
+[node name="MoodLabel" type="Label" parent="VBox"]
+text = "Mood Preset: SlowBurn"
+
+[node name="MoodSelector" type="OptionButton" parent="VBox"]
+
+[node name="CustomMoodRow" type="HBoxContainer" parent="VBox"]
+rect_min_size = Vector2(400, 28)
+
+[node name="CustomMoodName" type="LineEdit" parent="VBox/CustomMoodRow"]
+placeholder_text = "Custom mood name"
+min_size = Vector2(240, 24)
+
+[node name="SaveCustomButton" type="Button" parent="VBox/CustomMoodRow"]
+text = "Save as Custom Mood"
+
+[node name="ApplyMoodButton" type="Button" parent="VBox"]
+text = "Apply Mood"
+
 [node name="RunTestsButton" type="Button" parent="VBox"]
 text = "Run Tests"
 

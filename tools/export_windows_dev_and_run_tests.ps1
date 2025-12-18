@@ -10,10 +10,29 @@ What the script does:
  - prints the path to the test_results.json if found or displays console output for diagnostics
 #>
 param(
-    [string]$ProjectPath = "$(Get-Location)",
-    [string]$OutputDir = "$env:USERPROFILE\Games\CELL-Dev",
-    [string]$PresetName = "Windows Dev"
+    [Parameter(Mandatory = $true)]
+    [string]$ProjectPath,
+
+    [Parameter(Mandatory = $true)]
+    [string]$OutputDir,
+
+    [Parameter(Mandatory = $false)]
+    [string]$PresetName = "Windows Dev",
+
+    [Parameter(Mandatory = $false)]
+    [string]$GodotPath = ""
 )
+
+# Default Godot CLI path for this development node if not provided
+if (-not $GodotPath -or [string]::IsNullOrWhiteSpace($GodotPath)) {
+    $GodotPath = "C:\Users\Hunter\Godot\Godot_v4.5.1-stable_win64.exe"
+}
+
+# Verify Godot exists
+if (-not (Test-Path $GodotPath)) {
+    Write-Error "Godot executable not found at '$GodotPath'. Pass -GodotPath explicitly or update the default in this script."
+    exit 1
+}
 
 $ExportExe = Join-Path -Path $OutputDir -ChildPath "CELL.exe"
 $RunLog = Join-Path -Path $OutputDir -ChildPath "CELL-run-tests.log"
@@ -29,69 +48,26 @@ if (-not (Test-Path $ProjectPath)) {
 # Ensure output dir exists
 if (-not (Test-Path $OutputDir)) { New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null }
 
-# Find godot CLI or discover an installed executable
-$godot = $null
+# Find godot: allow override via parameter, fallback to a sensible default (edit if needed)
+if ([string]::IsNullOrWhiteSpace($GodotPath)) {
+    $GodotPath = "C:\Program Files\Godot\Godot_v4.5.1-stable_win64.exe"  # <- EDIT THIS PATH to match your machine if not passing -GodotPath
+}
 
-# Prefer CLI on PATH (godot4 then godot)
-if (Get-Command godot4 -ErrorAction SilentlyContinue) {
-    $godot = "godot4"
-} elseif (Get-Command godot -ErrorAction SilentlyContinue) {
-    $godot = "godot"
-} else {
-    Write-Output "Godot CLI not found on PATH; searching common install locations..."
-    $candidates = @()
-
-    $pf = $env:ProgramFiles
-    if ($pf) {
-        $candidates += @(
-            Join-Path $pf "Godot\godot.exe",
-            Join-Path $pf "Godot\godot4.exe",
-            Join-Path $pf "Godot Engine\godot.exe",
-            Join-Path $pf "Godot Engine\Godot.exe",
-            Join-Path $pf "Godot\Godot_v4.exe"
-        )
-    }
-
-    $localApp = Join-Path $env:LOCALAPPDATA "Programs\Godot"
-    $candidates += @(
-        Join-Path $localApp "godot.exe",
-        Join-Path $env:USERPROFILE "Downloads\godot.exe",
-        Join-Path $env:USERPROFILE "Downloads\Godot_v4.exe"
-    )
-
-    # Also check newly created export dir for portable copies
-    $candidates += (Get-ChildItem -Path $OutputDir -Filter "godot*.exe" -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName)
-
-    # Try shallow search in Program Files and Program Files (x86) for godot executables (non-recursive).
-    $pf86 = $env:ProgramFiles(x86)
-    if ($pf86) {
-        $candidates += (Get-ChildItem -Path $pf86 -Filter "godot*.exe" -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName)
-    }
-
-    foreach ($c in $candidates) {
-        if ($null -ne $c -and (Test-Path $c)) {
-            Write-Output "Found Godot executable at: $c"
-            $godot = $c
-            break
-        }
-    }
-
-    if (-not $godot) {
-        Write-Error "Godot executable not found on PATH or common locations. Install Godot or add it to PATH and retry."
-        Write-Error "Alternatively, open the Godot editor and use Project -> Export... to run the 'Windows Dev' preset manually."
-        exit 3
-    }
+if (-not (Test-Path $GodotPath)) {
+    Write-Error "Godot executable not found at '$GodotPath'. Either pass -GodotPath, add Godot to PATH, or edit this script to point to your install." 
+    Write-Error "Alternatively, open the Godot editor and use Project -> Export... to run the 'Windows Dev' preset manually."
+    exit 3
 }
 
 # Validate that Godot is runnable
 try {
-    $ver = & $godot --version 2>&1
+    $ver = & $GodotPath --version 2>&1
     Write-Output "Godot version info: $ver"
 } catch {
-    Write-Warning "Could not execute '$godot --version'. The executable may be missing dependencies or be an incompatible build."
+    Write-Warning ("Could not execute '{0} --version'. The executable may be missing dependencies or be an incompatible build." -f $GodotPath)
 }
 
-Write-Output "Using Godot CLI: $godot"
+Write-Output "Using Godot executable: $GodotPath"
 
 # Validate that the export preset exists in project export_presets.cfg
 $exportCfgPath = Join-Path -Path $ProjectPath -ChildPath "export_presets.cfg"
@@ -99,7 +75,8 @@ if (-not (Test-Path $exportCfgPath)) {
     Write-Warning "No export_presets.cfg found at $exportCfgPath. Ensure the 'Windows Dev' preset exists in Project -> Export..."
 } else {
     $cfgText = Get-Content -Path $exportCfgPath -Raw -ErrorAction SilentlyContinue
-    if ($cfgText -match "name\s*=\s*\"$PresetName\"") {
+    $pattern = 'name\s*=\s*"' + [regex]::Escape($PresetName) + '"'
+    if ($cfgText -match $pattern) {
         Write-Output "Export preset '$PresetName' found in export_presets.cfg"
     } else {
         Write-Warning "Export preset '$PresetName' was not found in export_presets.cfg. Please create it in Project -> Export..."
@@ -130,7 +107,7 @@ if (-not $templatesFound) {
     Write-Warning "Did not detect Godot export templates in $appDataGodot. Exports may fail if templates are missing."
     Write-Warning "Install export templates via the Godot editor (Editor -> Manage Export Templates) or via the Godot website."
 
-    function Try-Install-Templates {
+    function Test-InstallTemplates {
         param(
             [string]$versionString,
             [string]$destDir
@@ -138,11 +115,16 @@ if (-not $templatesFound) {
 
         Write-Output "Attempting automatic download of export templates for Godot version: $versionString"
 
-        # Parse the numeric version (e.g., 4.2.1) if present
+            # Parse the numeric version (e.g., 4.2.1) if present
         $v = $null
-        if ($versionString -match '(\d+\.\d+\.\d+)') { $v = $matches[1] }
-        elseif ($versionString -match '(\d+\.\d+)') { $v = $matches[1] }
-        else { $v = $versionString }
+        $rx = [regex]"(\d+\.\d+\.\d+)"
+        $m = $rx.Match($versionString)
+        if ($m.Success) { $v = $m.Groups[1].Value }
+        else {
+            $rx2 = [regex]"(\d+\.\d+)"
+            $m2 = $rx2.Match($versionString)
+            if ($m2.Success) { $v = $m2.Groups[1].Value } else { $v = $versionString }
+        }
 
         # Candidate filenames and base URLs
         $filenames = @(
@@ -173,13 +155,13 @@ if (-not $templatesFound) {
                         # Attempt extraction based on extension
                         $ext = [System.IO.Path]::GetExtension($tmpFile).ToLowerInvariant()
                         if ($ext -eq '.zip') {
-                            try { Expand-Archive -Path $tmpFile -DestinationPath $destDir -Force; Write-Output "Extracted templates to $destDir"; return $true } catch { Write-Warning "Expand-Archive failed for $tmpFile: $_" }
+                            try { Expand-Archive -Path $tmpFile -DestinationPath $destDir -Force; Write-Output "Extracted templates to $destDir"; return $true } catch { Write-Warning ("Expand-Archive failed for {0}: {1}" -f $tmpFile, $_) }
                         } elseif ($ext -eq '.tpz') {
                             # Some .tpz files are actually zip archives; try unzip via Expand-Archive
                             try { Expand-Archive -Path $tmpFile -DestinationPath $destDir -Force; Write-Output "Extracted .tpz (via Expand-Archive) to $destDir"; return $true } catch {
                                 # If Expand-Archive didn't work, attempt to rename to .zip and try again
                                 $alt = [System.IO.Path]::ChangeExtension($tmpFile, '.zip')
-                                try { Rename-Item -Path $tmpFile -NewName $alt -ErrorAction Stop; Expand-Archive -Path $alt -DestinationPath $destDir -Force; Write-Output "Renamed/Extracted .tpz->.zip to $destDir"; return $true } catch { Write-Warning "Failed to extract .tpz file: $_" }
+                                try { Rename-Item -Path $tmpFile -NewName $alt -ErrorAction Stop; Expand-Archive -Path $alt -DestinationPath $destDir -Force; Write-Output "Renamed/Extracted .tpz->.zip to $destDir"; return $true } catch { Write-Warning ("Failed to extract .tpz file: {0}" -f $_) }
                             }
                         } else {
                             Write-Warning "Unknown archive extension '$ext' for $tmpFile - manual installation may be required."
@@ -201,7 +183,7 @@ if (-not $templatesFound) {
     }
 
     if ($shouldAttempt) {
-        $installed = Try-Install-Templates -versionString $ver -destDir (Join-Path $appDataGodot 'templates')
+        $installed = Test-InstallTemplates -versionString $ver -destDir (Join-Path $appDataGodot 'templates')
         if ($installed) {
             Write-Output "Automatic template install appears successful. Re-checking templates..."
             # Quick verification
@@ -215,11 +197,16 @@ if (-not $templatesFound) {
 }
 
 # Export
-Write-Output "Exporting preset '$PresetName' to $ExportExe"
-$exportArgs = "--path `"$ProjectPath`" --export `"$PresetName`" `"$ExportExe`""
-$exportCmd = "$godot $exportArgs"
-Write-Output "Running: $exportCmd"
-$exportProc = Start-Process -FilePath $godot -ArgumentList "--path", $ProjectPath, "--export", $PresetName, $ExportExe -NoNewWindow -Wait -PassThru
+if ($PresetName -eq "Windows Dev") {
+    Write-Output ("Using preset '{0}' for export." -f $PresetName)
+} else {
+    Write-Warning ("Using preset '{0}' for export. Ensure it matches export_presets.cfg." -f $PresetName)
+}
+
+Write-Output ("Exporting preset '{0}' to {1}" -f $PresetName, $ExportExe)
+$exportArgs = @("--path", $ProjectPath, "--export", $PresetName, $ExportExe)
+Write-Output ("Running: {0} {1}" -f $godot, ($exportArgs -join ' '))
+$exportProc = Start-Process -FilePath $GodotPath -ArgumentList $exportArgs -NoNewWindow -Wait -PassThru
 if ($exportProc.ExitCode -ne 0) {
     Write-Error "Export failed (exit code $($exportProc.ExitCode)). Check Godot editor/export templates and that the preset exists."
     exit 4
@@ -237,8 +224,10 @@ Write-Output "Exe finished. Saved console output to $RunLog"
 
 # Try to locate the test results JSON via the console log
 $logText = Get-Content -Path $RunLog -Raw -ErrorAction SilentlyContinue
-if ($logText -match "TestRunner: wrote log to (.+)") {
-    $jsonPath = $matches[1].Trim()
+$rx = [regex]"TestRunner: wrote log to (.+)"
+$mm = $rx.Match($logText)
+if ($mm.Success) {
+    $jsonPath = $mm.Groups[1].Value.Trim()
     Write-Output "Detected TestRunner log path printed by game: $jsonPath"
     # If the path is user://, try mapped location in $env:APPDATA\Godot\app_userdata\<appname>\ ...
     if ($jsonPath -like "user://*") {

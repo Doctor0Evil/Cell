@@ -56,7 +56,7 @@ func _run() -> void:
 			if typeof(tile_desc) != TYPE_DICTIONARY:
 				continue
 			_process_tile_entry(tileset, atlas_sources, tile_desc, tile_size)
-		ResourceSaver.save(tileset_path, tileset)
+		ResourceSaver.save(tileset, tileset_path)
 		edited_tilesets[tileset_path] = true
 		print("CellTilesetCollisionNavPass: Updated collisions+nav in %s" % tileset_path)
 

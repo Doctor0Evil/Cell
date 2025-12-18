@@ -320,7 +320,7 @@ func _ensure_default_curves() -> void:
 		roar_volume_curve = c
 		var pth := "%s/ashveil_roar_volume_curve.tres" % base_dir
 		if Engine.is_editor_hint() and not ResourceLoader.exists(pth):
-			ResourceSaver.save(pth, c)
+			ResourceSaver.save(c, pth)
 			DebugLog.log("AshveilAmbience3D", "SAVE_CURVE", {"path": pth})
 
 	# Roar pitch: gentle near-linear rise
@@ -332,7 +332,7 @@ func _ensure_default_curves() -> void:
 		roar_pitch_curve = c2
 		var pth2 := "%s/ashveil_roar_pitch_curve.tres" % base_dir
 		if Engine.is_editor_hint() and not ResourceLoader.exists(pth2):
-			ResourceSaver.save(pth2, c2)
+			ResourceSaver.save(c2, pth2)
 			DebugLog.log("AshveilAmbience3D", "SAVE_CURVE", {"path": pth2})
 
 	# Creak volume: mild bump at mid intensity (slightly reduced bump)
@@ -345,7 +345,7 @@ func _ensure_default_curves() -> void:
 		creak_volume_curve = c3
 		var pth3 := "%s/ashveil_creak_volume_curve.tres" % base_dir
 		if Engine.is_editor_hint() and not ResourceLoader.exists(pth3):
-			ResourceSaver.save(pth3, c3)
+			ResourceSaver.save(c3, pth3)
 			DebugLog.log("AshveilAmbience3D", "SAVE_CURVE", {"path": pth3})
 
 	# Creak pitch: very shallow uptick at high intensity
@@ -357,5 +357,5 @@ func _ensure_default_curves() -> void:
 		creak_pitch_curve = c4
 		var pth4 := "%s/ashveil_creak_pitch_curve.tres" % base_dir
 		if Engine.is_editor_hint() and not ResourceLoader.exists(pth4):
-			ResourceSaver.save(pth4, c4)
+			ResourceSaver.save(c4, pth4)
 			DebugLog.log("AshveilAmbience3D", "SAVE_CURVE", {"path": pth4})

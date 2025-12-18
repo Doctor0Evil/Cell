@@ -37,7 +37,7 @@ func _exit_tree() -> void:
 
 func _on_bake_region_pressed() -> void:
     var sel := get_editor_interface().get_selection().get_selected_nodes()
-    if sel.empty():
+    if sel.is_empty():
         push_error("No TileMapLayer3D selected")
         return
     for node in sel:
@@ -70,24 +70,24 @@ func bake_region_full(tilemap) -> void:
     # 1. Extract metadata and generate RegionDefinition
     var region_def = RegionDefinition.new()
     _extract_region_metadata(tilemap, region_def)
-    ResourceSaver.save("%sregion_definition_%s.tres" % [region_dir, region_name], region_def)
+    ResourceSaver.save(region_def, "%sregion_definition_%s.tres" % [region_dir, region_name])
 
     # 2. Generate NavData
     var nav_data = RegionNavData.new()
     _generate_nav_data(tilemap, nav_data)
-    ResourceSaver.save("%sregion_nav_%s.tres" % [region_dir, region_name], nav_data)
+    ResourceSaver.save(nav_data, "%sregion_nav_%s.tres" % [region_dir, region_name])
 
     # 3. Full mesh bake + collision merge
     var baked_scene = _bake_merged_mesh(tilemap)
     var packed_scene = PackedScene.new()
     packed_scene.pack(baked_scene)
-    ResourceSaver.save("%s%s_baked.tscn" % [region_dir, region_name], packed_scene)
+    ResourceSaver.save(packed_scene, "%s%s_baked.tscn" % [region_dir, region_name])
 
     # 4. Auto-hook RegionRuntime
     var runtime_scene = _generate_runtime_scene(region_name, region_def, baked_scene)
     var runtime_packed = PackedScene.new()
     runtime_packed.pack(runtime_scene)
-    ResourceSaver.save("%s%s_runtime.tscn" % [region_dir, region_name], runtime_packed)
+    ResourceSaver.save(runtime_packed, "%s%s_runtime.tscn" % [region_dir, region_name])
 
     _log("🎉 Full region pipeline complete: %s" % region_dir)
 

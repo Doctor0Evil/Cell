@@ -64,7 +64,7 @@ func _process_manifest(path: String) -> void:
 		var p1 := Vector2(w - inset, inset)
 		var p2 := Vector2(w - inset, w - inset)
 		var p3 := Vector2(inset, w - inset)
-		var vertices := PoolVector2Array([p0, p1, p2, p3])
+		var vertices := PackedVector2Array([p0, p1, p2, p3])
 		poly.add_outline(vertices)
 		poly.make_polygons_from_outlines()
 
@@ -82,7 +82,7 @@ func _process_manifest(path: String) -> void:
 			if (not force_overwrite) and FileAccess.file_exists(out_scene_path):
 				print("Nav scene already exists, skipping (use force_overwrite to replace): %s" % out_scene_path)
 			else:
-				ResourceSaver.save(out_scene_path, scene)
+				ResourceSaver.save(scene, out_scene_path)
 				print("Wrote nav scene: %s" % out_scene_path)
 				# companion metadata
 				var meta := {"tileset": png_path, "atlas_coords": [rx, ry], "nav_scene": out_scene_path}

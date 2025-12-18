@@ -18,8 +18,8 @@ Helper script
 
 - A helper PowerShell script is provided at `tools/export_windows_dev_and_run_tests.ps1` to automate exporting and running the tests locally. Example usage from project root:
 
-  - `.	ools\export_windows_dev_and_run_tests.ps1` (uses defaults)
-  - `.	ools\export_windows_dev_and_run_tests.ps1 -ProjectPath 'C:\Users\Hunter\Repos\Cell' -OutputDir 'C:\Users\Hunter\Games\CELL-Dev'`
+  - `.	ools\export_windows_dev_and_run_tests.ps1` (uses defaults; edit or pass `-GodotPath` if Godot is not on PATH)
+  - `.	ools\export_windows_dev_and_run_tests.ps1 -ProjectPath 'C:\Users\Hunter\Repos\Cell' -OutputDir 'C:\Users\Hunter\Games\CELL-Dev' -GodotPath 'C:\Program Files\Godot\Godot_v4.5.1-stable_win64.exe'`
 
 Diagnostics
 

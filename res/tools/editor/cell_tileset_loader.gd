@@ -72,7 +72,7 @@ func _run() -> void:
 
 		# Save TileSet alongside the PNG
 		var ts_res_path := png_path.replace('.png', '.tres')
-		ResourceSaver.save(ts_res_path, ts)
+		ResourceSaver.save(ts, ts_res_path)
 
 		# Write a companion .json manifest with tile metadata for later editing (collisions/navigation)
 		var meta_path := png_path.replace('.png', '.tiles.json')

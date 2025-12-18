@@ -71,7 +71,7 @@ func _play_vent_response(vent: Node3D) -> void:
 	whisper_player.play()
 
 func _schedule_growler_hunt(player: Node3D) -> void:
-	if _spawn_points.empty() or growler_scene == null:
+	if _spawn_points.is_empty() or growler_scene == null:
 		DebugLog.log("MoonhowlVentController", "SPAWN_SKIPPED", {
 			"reason": "NO_SPAWN_POINTS_OR_SCENE"
 		})
@@ -102,8 +102,8 @@ func _spawn_growler_at(spawn_point: Node3D, player: Node3D) -> void:
 	})
 
 func pulse_long_night(delta: float, moon_intensity: float) -> void:
-	GameState.oxygendrainrate = max(1.0, GameState.oxygendrainrate + 0.05 * moon_intensity * delta)
-	GameState.currentregionstress += 0.02 * moon_intensity * delta
+	GameState.oxygen_drain_rate = max(1.0, GameState.oxygen_drain_rate + 0.05 * moon_intensity * delta)
+	GameState.current_region_stress += 0.02 * moon_intensity * delta
 	for g in _active_growlers:
 		if g and g.has_method("boost_aggression_from_moon"):
 			g.call("boost_aggression_from_moon", moon_intensity)

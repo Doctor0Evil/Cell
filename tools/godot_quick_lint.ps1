@@ -25,9 +25,9 @@ Add-Content -Path $out -Value "Godot Quick Lint Report - $(Get-Date)`n"
 foreach ($k in $patterns.Keys) {
     Add-Content -Path $out -Value "\n== $k =="
     $pat = $patterns[$k]
-    $matches = Select-String -Path "**/*.gd" -Pattern $pat -SimpleMatch -CaseSensitive:$false -ErrorAction SilentlyContinue
-    if ($matches) {
-        foreach ($m in $matches) {
+    $lintMatches = Select-String -Path "**/*.gd" -Pattern $pat -SimpleMatch -CaseSensitive:$false -ErrorAction SilentlyContinue
+    if ($lintMatches) {
+        foreach ($m in $lintMatches) {
             Add-Content -Path $out -Value "$($m.Path):$($m.LineNumber): $($m.Line.Trim())"
         }
     } else { Add-Content -Path $out -Value "(none found)" }

@@ -39,7 +39,7 @@ func generate_region_from_scene(scene_path: String) -> Dictionary:
             tm_nodes.append(node)
 
     # Try a more recursive find
-    if tm_nodes.empty():
+    if tm_nodes.is_empty():
         tm_nodes = _find_nodes_by_class_recursive(root, "TileMapLayer3D")
 
     for t in tm_nodes:
@@ -75,13 +75,13 @@ func generate_region_from_scene(scene_path: String) -> Dictionary:
 
     # Save region definition
     var save_path := OUT_DIR + region_id + ".tres"
-    ResourceSaver.save(save_path, def)
+    ResourceSaver.save(def, save_path)
 
     # Create a placeholder nav data resource
     var nav := preload("res://resources/regions/region_nav_data.gd").new()
     nav.grid_size = 1
     nav.nav_mesh_path = ""
-    ResourceSaver.save(OUT_DIR + region_id + "_nav.tres", nav)
+    ResourceSaver.save(nav, OUT_DIR + region_id + "_nav.tres")
 
     # Bake a placeholder scene containing each TileMapLayer3D as a child node (real bake should produce meshes)
     var baked_scene := PackedScene.new()
@@ -91,7 +91,7 @@ func generate_region_from_scene(scene_path: String) -> Dictionary:
         var copy := t.duplicate()
         baked_root.add_child(copy)
     baked_scene.pack(baked_root)
-    ResourceSaver.save(OUT_DIR + region_id + "_mesh.tscn", baked_scene)
+    ResourceSaver.save(baked_scene, OUT_DIR + region_id + "_mesh.tscn")
 
     DebugLog.log("TileMapLayer3DExporter", "EXPORT", {"region": region_id, "scene": scene_path})
     result["ok"] = true

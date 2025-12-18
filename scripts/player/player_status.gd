@@ -34,7 +34,7 @@ const PANIC_SANITY_THRESHOLD := 0.35
 const BLEEDOUT_HEALTH_THRESHOLD := 0.25
 
 # Cached display state for HUD (normalized 0.0–1.0)
-var hud_state := {
+var hud_state: Dictionary = {
     "health": 1.0,
     "oxygen": 1.0,
     "stamina": 1.0,
@@ -124,7 +124,7 @@ func _physics_process(delta: float) -> void:
 
     # Apply ambient heat from FireNodes / CampfireRemains
     if ambient_heat_delta_c_per_sec != 0.0:
-        vitality_system.bodytemperature = clampf(
+        vitality_system.bodytemperature = clamp(
             vitality_system.bodytemperature + ambient_heat_delta_c_per_sec * delta,
             vitality_system.bodytemperature_min,
             vitality_system.bodytemperature_max

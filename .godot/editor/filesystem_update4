@@ -1,0 +1,15 @@
+res://res/scripts/tests/test_lox_bottle.gd
+res://res/scripts/world/hades_theta/moonhowl_vent_controller.gd
+res://res/tools/editor/cell_tileset_collision_nav_pass.gd
+res://res/tools/editor/cell_tileset_loader.gd
+res://res/tools/editor/cell_tileset_navgen.gd
+res://res/tools/editor/cell_tileset_postprocess.gd
+res://scripts/core/cell_content_registry.gd
+res://scripts/core/GameState.gd
+res://scripts/core/data/asset_database.gd
+res://scripts/core/data/asset_definition.gd
+res://scripts/player/player_status.gd
+res://scripts/world/ashveil_ambience_3d_controller.gd
+res://tools/editor/law_importer.gd
+res://tools/world/generate_region_from_tilemap.gd
+res://tools/world/region_baker_editor_plugin.gd
