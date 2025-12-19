@@ -2,7 +2,6 @@ extends Node
 class_name RegionSimManager
 
 # One entry per loaded/known region – not per-NPC node.
-class_name RegionSimManager
 
 class RegionSimState:
     var region_id: StringName

@@ -30,24 +30,24 @@ func _build_index() -> void:
             push_warning("AssetRegistry: duplicate id '%s', overwriting." % a.id)
         _by_id[a.id] = a
 
-func get(id: StringName) -> AssetDefinition:
+func get_asset(id: StringName) -> AssetDefinition:
     if not _by_id.has(id):
         push_warning("AssetRegistry: unknown asset id '%s'." % id)
         return null
     return _by_id[id] as AssetDefinition
 
 func get_weapon(id: StringName) -> WeaponDefinition:
-    var a := get(id)
+    var a := get_asset(id)
     return a as WeaponDefinition
 
 func get_armor(id: StringName) -> ArmorDefinition:
-    var a := get(id)
+    var a := get_asset(id)
     return a as ArmorDefinition
 
 func get_implant(id: StringName) -> ImplantDefinition:
-    var a := get(id)
+    var a := get_asset(id)
     return a as ImplantDefinition
 
 func get_consumable(id: StringName) -> ConsumableDefinition:
-    var a := get(id)
+    var a := get_asset(id)
     return a as ConsumableDefinition

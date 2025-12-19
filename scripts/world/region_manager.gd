@@ -75,8 +75,9 @@ func _apply_region_audio_profile() -> void:
 # -------------------------------------------------------------------
 
 func _load_region_descriptor() -> void:
-    var region_data := CellContentRegistry.get_region(region_id)
-    if region_data.is_empty():
+    var registry: Node = get_node_or_null("/root/CellContentRegistry")
+    var region_data: Dictionary = {} if registry == null else registry.get_region(region_id)
+    if region_data == null or (region_data is Dictionary and region_data.is_empty()):
         DebugLog.log("RegionManager", "REGION_DESCRIPTOR_MISSING", {
             "region_id": String(region_id)
         })
@@ -132,11 +133,18 @@ func _spawn_player() -> void:
 # -------------------------------------------------------------------
 
 func _apply_region_modifiers() -> void:
-    var region_data := CellContentRegistry.get_region(GameState.current_region_id)
+    var registry: Node = get_node_or_null("/root/CellContentRegistry")
+    var gs: Node = get_node_or_null("/root/GameState")
+    var region_data: Dictionary = {} if registry == null else registry.get_region(gs.current_region_id if gs else GameState.current_region_id)
 
-    GameState.current_region_cold = float(region_data.get("temperature_modifier", 0.0))
-    GameState.current_region_stress = float(region_data.get("oxygen_modifier", 0.0))
-    GameState.contamination_level = float(region_data.get("infection_bias", 0.0))
+    if gs and gs is GameState:
+        gs.current_region_cold = float(region_data.get("temperature_modifier", 0.0))
+        gs.current_region_stress = float(region_data.get("oxygen_modifier", 0.0))
+        gs.contamination_level = float(region_data.get("infection_bias", 0.0))
+    else:
+        GameState.current_region_cold = float(region_data.get("temperature_modifier", 0.0))
+        GameState.current_region_stress = float(region_data.get("oxygen_modifier", 0.0))
+        GameState.contamination_level = float(region_data.get("infection_bias", 0.0))
 
     # Optionally inform ambience controller of darkness level and tension.
     if _ambience_controller and _ambience_controller.has_method("apply_region_profile"):

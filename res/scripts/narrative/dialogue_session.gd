@@ -67,13 +67,13 @@ func choose(choice_id: StringName) -> void:
 	for c in node.choices:
 		if c.id == choice_id:
 			# Run speech checks if present
-			var check_result := {}
+			var check_result: Dictionary = {}
 			if c.checks and c.checks.size() > 0 and speech_evaluator:
 				# We only handle the first check for now
-				var check_spec := c.checks[0]
+				var check_spec: Dictionary = c.checks[0]
 				if speech_evaluator.has_method("set_context"):
 					speech_evaluator.set_context(context)
-				var raw := speech_evaluator.roll_speech_check(check_spec)
+				var raw: Dictionary = speech_evaluator.roll_speech_check(check_spec)
 				# Normalize to a common shape
 				check_result = {
 					"passed": bool(raw.get("success", raw.get("success", raw.get("passed", false)))),
@@ -85,7 +85,7 @@ func choose(choice_id: StringName) -> void:
 				last_check_result = check_result
 				emit_signal("speech_check_resolved", c.id, check_result)
 				# Build snapshot extras
-				var extras := {
+				var extras: Dictionary = {
 					"speech_check_result": check_result,
 					"chosen_choice": c.id,
 					"evaluated_traits": false,
@@ -94,7 +94,7 @@ func choose(choice_id: StringName) -> void:
 				}
 				# Inspect conditions to set evaluated flags
 				for cond in c.conditions:
-					var t := str(cond.get("type", "")).to_lower()
+					var t: String = str(cond.get("type", "")).to_lower()
 					if t.find("trait") != -1:
 						extras["evaluated_traits"] = true
 					if t.find("faction") != -1 or t.find("respect") != -1:
@@ -102,9 +102,9 @@ func choose(choice_id: StringName) -> void:
 					if t.find("vitality") != -1 or t.find("stat") != -1:
 						extras["evaluated_vitality"] = true
 				# Decide routing based on check success
-				var success := check_result.get("passed", false)
-				var next_id := c.next
-				var effects := c.effects
+				var success: bool = check_result.get("passed", false)
+				var next_id: StringName = c.next
+				var effects: Array = c.effects
 				if success:
 					if c.on_success_next != StringName():
 						next_id = c.on_success_next

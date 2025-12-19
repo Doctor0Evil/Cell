@@ -207,8 +207,9 @@ func _ready() -> void:
 	_ensure_default_curves()
 	# Apply preview profile at edit/test time
 	if preview_profile_id != &"":
-		var region_def := CellContentRegistry.get_region(preview_profile_id)
-		if not region_def.is_empty() and has_method("apply_region_profile"):
+		var registry: Node = get_node_or_null("/root/CellContentRegistry")
+		var region_def: Dictionary = {} if registry == null else registry.get_region(preview_profile_id)
+		if region_def and region_def.size() > 0 and has_method("apply_region_profile"):
 			apply_region_profile(region_def, int(region_def.get("difficulty", 1)))
 	# Auto-bind if enabled
 	if auto_bind_on_ready:

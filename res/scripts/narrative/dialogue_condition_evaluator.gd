@@ -40,17 +40,17 @@ func _faction_standing_min(faction: StringName, min_value: float, subject: Strin
 	# subject-aware reservation: check player vs npc
 	if subject == StringName("player"):
 		if faction_system and faction_system.has_method("get_standing"):
-			var standing := faction_system.get_standing(faction)
+			var standing: float = float(faction_system.get_standing(faction))
 			return standing >= min_value
 		if respect_system and respect_system.has_method("get_respect_for"):
-			var s := respect_system.get_respect_for(faction)
+			var s: float = float(respect_system.get_respect_for(faction))
 			return s >= min_value
 	if subject == StringName("npc") and context.has("npc"):
 		var n := context["npc"]
 		if n and n.has("base_faction"):
 			if faction_system and faction_system.has_method("get_relation_between"):
 				# hypothetical method: get_relation_between(faction_a, faction_b)
-				var rel := faction_system.get_relation_between(n.base_faction, faction)
+				var rel: float = float(faction_system.get_relation_between(n.base_faction, faction))
 				return rel >= min_value
 	# fallback
 	if faction_system and faction_system.has_method("get_standing"):

@@ -70,8 +70,9 @@ func reset_for_new_run() -> void:
 
 func load_region(region_id: StringName) -> void:
     current_region_id = region_id
-    var region_data := CellContentRegistry.get_region(region_id)
-    if region_data.is_empty():
+    var registry: Node = get_node_or_null("/root/CellContentRegistry")
+    var region_data: Dictionary = {} if registry == null else registry.get_region(region_id)
+    if region_data == null or (region_data is Dictionary and region_data.is_empty()):
         push_error("Unknown region '%s'." % region_id)
         DebugLog.log("GameState", "REGION_LOAD_FAILED", {"region_id": String(region_id)})
         return

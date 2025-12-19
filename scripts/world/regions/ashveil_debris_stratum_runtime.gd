@@ -23,7 +23,9 @@ func _ready() -> void:
         ambience_player.start_ambience()
 
     # Example: set base environmental modifiers from a RegionDefinition if present
-    var region_def := CellContentRegistry.get_region(GameState.current_region_id)
+    var registry := get_node_or_null("/root/CellContentRegistry")
+    var gs := get_node_or_null("/root/GameState")
+    var region_def := {} if registry == null else registry.get_region(gs.current_region_id if gs else GameState.current_region_id)
     if not region_def.is_empty():
         var temp := float(region_def.get("temperature_modifier", 0.0))
         var oxy := float(region_def.get("oxygen_modifier", 0.0))

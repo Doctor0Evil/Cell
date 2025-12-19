@@ -62,11 +62,19 @@ func load_last_profile() -> void:
     if typeof(data) == TYPE_DICTIONARY:
         current_profile = data
         var region := StringName(current_profile.get("last_region", "ASHVEIL_DEBRIS_STRATUM"))
-        GameState.current_profile_id = &"default"
-        DebugLog.log("SaveSystem", "PROFILE_LOADED", {
-            "region": String(region)
-        })
-        GameState.load_region(region)
+        var gs := get_node_or_null("/root/GameState")
+        if gs:
+            gs.current_profile_id = &"default"
+            DebugLog.log("SaveSystem", "PROFILE_LOADED", {
+                "region": String(region)
+            })
+            gs.load_region(region)
+        else:
+            GameState.current_profile_id = &"default"
+            DebugLog.log("SaveSystem", "PROFILE_LOADED", {
+                "region": String(region)
+            })
+            GameState.load_region(region)
     else:
         DebugLog.log("SaveSystem", "LOAD_FAILED_PARSE", {})
 
