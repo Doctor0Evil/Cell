@@ -1,0 +1,84 @@
+{
+  "id": "ashveil_scavenger_intro",
+  "title": "Ashveil Scavenger – First Contact",
+  "meta": {
+    "region_tags": ["ASHVEILDRIFT"],
+    "factions": ["SCAVENGERRINGS"],
+    "narrative_tags": ["SCRAPROUTE", "FIRST_CONTACT"],
+    "priority": 10
+  },
+  "nodes": [
+    {
+      "id": "start",
+      "type": "line",
+      "speaker": "npc",
+      "text": "The dust eats metal and lungs out here. You still breathing, stranger?",
+      "next": "player_root"
+    },
+    {
+      "id": "player_root",
+      "type": "choice",
+      "choices": [
+        {
+          "id": "ask_for_help",
+          "text": "[Influence/Containment Face] \"Need routes that do not end in solvent rain.\"",
+          "conditions": [
+            { "type": "has_trait", "value": "containmentface" },
+            { "type": "faction_standing_min", "faction": "SCAVENGERRINGS", "standing": -10 }
+          ],
+          "effects": [
+            { "type": "respect_delta", "faction": "SCAVENGERRINGS", "value": 5 },
+            { "type": "flag_set", "flag": "ashveil_scavenger_routes_unlocked", "value": true }
+          ],
+          "next": "npc_respectful"
+        },
+        {
+          "id": "joke",
+          "text": "\"If the station wanted me dead, it would send something prettier.\"",
+          "conditions": [],
+          "effects": [
+            { "type": "disposition_delta", "faction": "SCAVENGERRINGS", "value": 3 }
+          ],
+          "next": "npc_amused"
+        },
+        {
+          "id": "intimidate",
+          "text": "[Hard Edge] \"Point me at solvent, scrap, or bodies. I do not like wasting O₂.\"",
+          "conditions": [
+            { "type": "has_trait", "value": "hardedge" }
+          ],
+          "effects": [
+            { "type": "respect_delta", "faction": "SCAVENGERRINGS", "value": 2 },
+            { "type": "respect_delta", "faction": "FORMALSECURITY", "value": -3 }
+          ],
+          "next": "npc_wary"
+        }
+      ]
+    },
+    {
+      "id": "npc_respectful",
+      "type": "line",
+      "speaker": "npc",
+      "text": "Containment tone. Fine. I have a route. You carry it; I deny knowing you.",
+      "next": "end"
+    },
+    {
+      "id": "npc_amused",
+      "type": "line",
+      "speaker": "npc",
+      "text": "Hah. If you can still joke, you have not seen the lower decks yet.",
+      "next": "end"
+    },
+    {
+      "id": "npc_wary",
+      "type": "line",
+      "speaker": "npc",
+      "text": "Edge like that gets you filed under \"temporary asset\" out here.",
+      "next": "end"
+    },
+    {
+      "id": "end",
+      "type": "end"
+    }
+  ]
+}
