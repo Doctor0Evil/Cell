@@ -22,9 +22,9 @@ jobs:
           use-dotnet: false
           include-templates: false
 
-      - name: Run TestRunner scene (headless)
+            - name: Run TestRunner scene (headless)
         run: |
-          godot4 --headless --quiet --path . \
+          godot --headless --quiet --path . \
             --quit --run res://scenes/tests/TestRunner.tscn \
             > godot-test-output.log 2>&1
 
