@@ -43,4 +43,18 @@ func load_default_assets() -> void:
         for ox_def in OxygenRegistry.build_all():
             assets.append(ox_def)
 
+    # Generated consumables from disk (res://res/data/consumables/*.tres)
+    var _da := DirAccess.open("res://res/data/consumables")
+    if _da:
+        _da.list_dir_begin()
+        var _f := _da.get_next()
+        while _f != "":
+            if _f.endswith(".tres"):
+                var _path := "res://res/data/consumables/" + _f
+                var _r := ResourceLoader.load(_path)
+                if _r and _r is ConsumableDefinition:
+                    assets.append(_r)
+            _f = _da.get_next()
+        _da.list_dir_end()
+
     # (Note: ensure this function is called by your startup/init code.)

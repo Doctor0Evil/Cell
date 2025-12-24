@@ -1,0 +1,81 @@
+-------------consumables--------------------------------------
+-dm-anger          [+Strength4, +Instinct+0.3, +Vitality+0.2, +Tenacity+0.25] 
+                  [addiction_channel=STIM, withdrawal_template=stim_rage_loop] 
+                  [duration=180s, safe_stack=2, min_yield=3.0]
+                  [tags: chem_stim, combat, rage, overdose_risk]
+-
+-oxy_capsule_mk1   [+Oxygen+35, -Wellness-2.0, -Vitality-0.05] 
+                  [addiction_channel=OXYGEN, withdrawal_template=oxygen_chem_loop] 
+                  [duration=0s (instant), safe_stack=3, min_yield=1.0]
+                  [tags: oxygen, chem, survival, ashveil]
+-
+-ration_chips      [+Protein+15, +Water+20, -Temper-0.1] 
+                  [addiction_channel=RATION, withdrawal_template=ration_dependence] 
+                  [duration=3600s (hunger suppress), safe_stack=5, min_yield=2.0]
+                  [tags: food, ration, industrial, long_term]
+-
+-sed_pill_blue     [+Wellness+25, +Logic+0.4, -Agility-0.2] 
+                  [addiction_channel=SEDATIVE, withdrawal_template=sed_withdrawal] 
+                  [duration=600s, safe_stack=4, min_yield=4.0]
+                  [tags: chem_sedative, pain_suppress, mindfog, coldverge]
+-
+-stim_injector     [+Stamina+40, +Agility+0.5, -Blood-8.0] 
+                  [addiction_channel=STIM, withdrawal_template=stim_crash] 
+                  [duration=120s, safe_stack=1, min_yield=2.5]
+                  [tags: chem_stim, speed_boost, heartstrain, overdose]
+-
+-water_purifier    [+Water+50, +Wellness+5, -Protein-3.0] 
+                  [addiction_channel=WATER, withdrawal_template=purifier_gut] 
+                  [duration=0s (instant), safe_stack=8, min_yield=1.0]
+                  [tags: water, chem, filtration, contamination_risk]
+-
+-pain_patch        [+Wellness+15, -Stamina_decay*0.7, -Logic-0.15] 
+                  [addiction_channel=PAINRELIEF, withdrawal_template=pain_rebound] 
+                  [duration=900s, safe_stack=3, min_yield=3.5]
+                  [tags: medical, painkill, numbness, fracture_mask]
+-
+-therm_regulator   [+BodyTemp+8.0, +Tenacity+0.2, -Oxygen-10] 
+                  [addiction_channel=THERMAL, withdrawal_template=thermo_shock] 
+                  [duration=300s, safe_stack=2, min_yield=2.0]
+                  [tags: thermal, chem, coldverge, heatstroke_risk]
+-
+-blood_stabilizer  [+Blood+20, +Yield+0.1, -Influence-0.3] 
+                  [addiction_channel=BLOOD, withdrawal_template=blood_thinner] 
+                  [duration=1800s, safe_stack=4, min_yield=4.5]
+                  [tags: medical, blood_boost, paranoia, hemophilia]
+-
+-nano_repair       [+Wellness+12, +Protein+8, -Vitality-0.08] 
+                  [addiction_channel=NANO, withdrawal_template=nano_rejection] 
+                  [duration=600s, safe_stack=3, min_yield=5.0]
+                  [tags: nano, repair, infection_risk, experimental]
+-
+-adrenaline_vial   [+Stamina+60, +Strength+0.6, -Wellness-15] 
+                  [addiction_channel=STIM, withdrawal_template=adrenex_crash] 
+                  [duration=90s, safe_stack=1, min_yield=3.0]
+                  [tags: chem_stim, berserk, heart_failure, rare]
+-
+-sleep_inducer     [+Wellness+30, -Stamina_decay*0.4, -Agility-0.4] 
+                  [addiction_channel=SEDATIVE, withdrawal_template=sleep_insomnia] 
+                  [duration=2400s, safe_stack=2, min_yield=4.0]
+                  [tags: chem_sedative, rest, blackout_risk, shiftcrew]
+-
+-filter_cartridge  [+Oxygen+25, +Water+15, -Logic-0.2] 
+                  [addiction_channel=FILTER, withdrawal_template=filter_blindness] 
+                  [duration=7200s, safe_stack=6, min_yield=2.0]
+                  [tags: filter, survival, ashveil, vision_damage]
+-
+-protein_synth     [+Protein+25, +Yield+0.15, -Temper-0.2] 
+                  [addiction_channel=RATION, withdrawal_template=synth_malnutrition] 
+                  [duration=3600s, safe_stack=4, min_yield=3.0]
+                  [tags: ration, synthfood, muscle_waste, industrial]
+-
+-neuro_stab        [+Logic+0.8, +Influence+0.3, -Instinct-0.4] 
+                  [addiction_channel=NEURO, withdrawal_template=neuro_psychosis] 
+                  [duration=1200s, safe_stack=2, min_yield=5.5]
+                  [tags: chem_neuro, cognition, hallucination, forbidden]
+-
+-corruption_purge  [+Vitality+0.3, -Blood-20, -Wellness-10] 
+                  [addiction_channel=PURGE, withdrawal_template=purge_immunity_loss] 
+                  [duration=300s, safe_stack=1, min_yield=6.0]
+                  [tags: medical, anti_cell, immune_crash, experimental]
+-------------------------------------------------------------
