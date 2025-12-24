@@ -146,3 +146,175 @@ Once SCM is working:
 3. Agents should:
 - Prefer VS Code’s UI for conflict resolution where possible (visual merge tools).
 - Offer command-line equivalents for automation or headless environments.
+
+---
+
+## 3. Game-development Git workflow rules
+
+These rules tune Git behavior for **game projects** (e.g., Godot-like, large assets, multi-disciplinary teams).
+
+### 3.1. Branching model for game projects
+
+Agents must default to a **feature branch workflow** unless the repo defines otherwise.
+
+Recommended branch types:
+
+- `main` / `master`  
+- Always stable and releasable; game should build and run from here.
+
+- `develop` (optional, if Gitflow-style)  
+- Integration branch for features; CI may build and test here.
+
+- `feature/*`  
+- One branch per mechanic/system/feature (e.g., `feature/ai-patrol`, `feature/horror-lighting-pass`).
+
+- `hotfix/*`  
+- For urgent production fixes.
+
+The agent should:
+
+1. Instruct users to start work by updating the base branch:
+
+```
+git checkout main
+git pull origin main
+```
+
+or if using `develop`:
+
+```
+git checkout develop
+git pull origin develop
+```
+
+2. Create feature branches:
+
+```
+git checkout -b feature/<short-description>
+```
+
+3. Encourage **small, frequent commits** with meaningful messages and scope-limited changes.
+
+---
+
+### 3.2. Integrating and updating branches
+
+To keep branches up-to-date and reduce conflicts:
+
+1. Regularly rebase or merge from parent branch:
+
+```
+git fetch origin
+git rebase origin/develop   # or origin/main
+```
+
+2. Prefer:
+- Rebase for smaller branches that are short-lived.
+- Merge for large, long-lived branches (to avoid painful interactive rebases).
+
+3. Before PR merge:
+- Ensure branch builds and runs in the game engine.
+- Resolve conflicts and rerun automated tests (if present).
+
+---
+
+### 3.3. Large assets and Git LFS
+
+Game projects frequently include large binary files (textures, models, audio)
+
+Agents should:
+
+1. Recommend **Git LFS** for large assets:
+
+```
+git lfs install
+git lfs track "*.png"
+git lfs track "*.psd"
+git lfs track "*.fbx"
+git add .gitattributes
+git commit -m "Configure Git LFS for large assets"
+```
+
+2. Encourage `.gitignore` rules to exclude:
+- Engine caches and temporary files.
+- Local/editor-specific metadata that is not needed in source control.
+
+3. Advise structuring assets so that:
+- Different teams (art, code, design) seldom modify the same files, reducing merge conflicts in binaries.
+
+---
+
+## 4. Pull Requests and collaboration
+
+Agents should enforce PR discipline aligned with game-dev best practices:
+
+1. **Before opening a PR**:
+- Update branch from main/develop.
+- Ensure:
+  - Game builds in the engine.
+  - No obvious build-breaking changes.
+  - Commit history is reasonable (optionally squashed).
+
+2. **PR content**:
+- Describe:
+  - What changed.
+  - How to test (e.g., which level/scene to open).
+  - Any asset or content implications (new sounds, shaders, scenes).
+
+### Client-side rate guard (recommended)
+
+To prevent IDEs and automation from exceeding provider rate limits or triggering abuse flags, add a strict client-side guard and bind it to any editor-side tooling or MCP bridges. We recommend adding `res/scripts/tools/cell_ide_rate_guard.gd` as an autoload for editor tooling. Suggested usage:
+
+- Check `CellIDERateGuard.can_send_request()` before each external call; when `true` call `CellIDERateGuard.register_request()` immediately before the request.  
+- If `can_send_request()` is `false`, log a clear warning (e.g., `RATE_GUARD_BLOCKED`) and abort that iteration instead of retrying rapidly.  
+- Default guidance: `WINDOW_SECONDS = 60.0`, `MAX_REQUESTS_PER_WINDOW = 45`, and a per-iteration cap of 10 tasks.  
+- On provider 429 responses, back off exponentially and surface the error rather than retrying to exhaustion.
+
+This script is included in the repo at `res/scripts/tools/cell_ide_rate_guard.gd` and should be referenced by any MCP/IDE integrations and documented in tooling READMEs.
+
+2. Agents must **not** request or store secrets/tokens in the repository:
+- Use platform features (e.g., GitHub Actions secrets) for authentication.
+- Never embed personal access tokens, GITHUB_SECRETS, or similar in code or config.
+
+---
+
+## 5. Automation & MCP/IDE behavior
+
+To remain automation-friendly:
+
+1. Agents must **prefer deterministic commands** that can be executed by tools, such as:
+- Diagnostics:
+```
+git --version
+git status
+git rev-parse --show-toplevel
+git branch -a
+```
+- Branch operations:
+```
+git checkout main
+git pull origin main
+git checkout -b feature/<name>
+git fetch origin
+git rebase origin/main
+```
+
+2. Agents must **not** request or store secrets/tokens in the repository:
+- Use platform features (e.g., GitHub Actions secrets) for authentication.
+- Never embed personal access tokens, GITHUB_SECRETS, or similar in code or config.
+
+3. When encountering SCM errors:
+- Always run the Git/VS Code diagnostics in Sections 1 and 2 **before** attempting branch surgery (rebases, resets, rewrites).
+
+---
+
+## 6. Error → Action summary (for quick application)
+
+| Error / Symptom                                | Required Agent Actions                                                                                          |
+|-----------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| `Git not found` / `Git installation not found`| Check `git --version`; install Git; ensure PATH; set `"git.path"` if needed; restart VS Code.    |
+| `No source control providers registered`      | Enable built-in Git extension; set `"git.enabled": true`; open correct repo folder; nudge SCM via Git commands. |
+| `fatal: not a git repository`                 | Verify current directory; ensure `.git` exists; `cd` to repo root; avoid `git init` unless intentionally new. |
+| VS Code shows repo but Git operations fail    | Verify remote configuration, branch tracking, and that Git is properly configured; repair upstream and remotes.  |
+
+All tools and agents in this space must **adhere to this ruleset** when handling Git/ VS Code issues and must ensure a healthy SCM state before performing game‑dev branch/PR operations.
