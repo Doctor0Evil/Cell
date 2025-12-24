@@ -231,6 +231,15 @@ Before opening a PR:
 2. Wire new systems into `DebugLog` for traceability.  
 3. Keep names grounded, industrial, and non‑fantasy to match CELL’s tone.
 
+## Git & VS Code rules
+
+This repo uses a standardized Git, VS Code, and branch/PR workflow to avoid SCM issues and merge conflicts.  
+See [docs/git-rules-vscode-gamedev.md](docs/git-rules-vscode-gamedev.md) for:
+
+- Fixing Git/ VS Code errors (e.g., “Git installation not found”, “No source control providers registered”, “fatal: not a git repository”)
+- Required diagnostics before touching branches or PRs
+- Recommended branching, PR, and merge practices for game development projects
+
 ---
 
 ## Roadmap (High Level)

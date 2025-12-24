@@ -1,0 +1,32 @@
+name: Docs Rules Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+jobs:
+  verify-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ensure Git/VS Code rules doc exists
+        run: |
+          if [ ! -f "docs/git-rules-vscode-gamedev.md" ]; then
+            echo "docs/git-rules-vscode-gamedev.md is missing. This repo requires the Git/VS Code rules file."
+            exit 1
+          fi
+          echo "Found docs/git-rules-vscode-gamedev.md"
+
+      - name: Basic link check for README pointer
+        run: |
+          if ! grep -qi "git-rules-vscode-gamedev" ReadMe.md README.md || true; then
+            echo "README does not reference docs/git-rules-vscode-gamedev.md."
+            echo "Add a short pointer in README to guide contributors to the rules."
+            exit 1
+          fi
+          echo "README references the Git/VS Code rules doc."

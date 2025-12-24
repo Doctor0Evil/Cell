@@ -261,6 +261,7 @@ Agents should enforce PR discipline aligned with game-dev best practices:
   - How to test (e.g., which level/scene to open).
   - Any asset or content implications (new sounds, shaders, scenes).
 
+<<<<<<< HEAD
 ### Companion mentor: CellCompanionHorrorAssetMentor
 
 Add a companion mentor node to help IDEs and agents generate and integrate horror assets safely and reproducibly. Place the file at `res/scripts/ai/cell_companion_horror_asset_mentor.gd` and register it as an autoload or call it from your editor bridge.
@@ -271,6 +272,7 @@ Recommended behavior:
 - Use `suggest_asset_pipeline()` to drive per-asset checklists and bind pipeline steps to CI checks (lint, size, palette, license metadata).
 - Before committing assets, query `get_attribution_instructions()` to ensure proper attribution for CC-BY assets and refuse import on unknown licenses.
 
+<<<<<<< HEAD
 ### Horror art pipeline mentor: CellHorrorArtPipelineMentor
 
 Add a horror art pipeline mentor at `res/scripts/ai/cell_horror_art_pipeline_mentor.gd` to provide asset teams and IDE agents with:
@@ -280,6 +282,17 @@ Add a horror art pipeline mentor at `res/scripts/ai/cell_horror_art_pipeline_men
 - Practical tips for environment art, character concept prompts, and night-vision shader guidance.
 
 Register this script as an autoload (or call from the same PromptHub the other mentor uses) so IDE bridges can request pipeline steps and folder guidance automatically.
+=======
+This companion is included in the repository at `res/scripts/ai/cell_companion_horror_asset_mentor.gd` and can be used by IDE plugins or external MCP agents to keep asset creation compliant and reproducible.
+=======
+3. **During PR review**:
+- Encourage early and frequent integration to avoid huge, unreviewable PRs.
+- Suggest use of visual diff or specialized merge tools for scene/asset files when supported.
+
+4. **After merge**:
+- Delete merged feature branches in remote and local to keep branch list clean (if repo policy permits).
+>>>>>>> 3dc78c9 (12)
+>>>>>>> 78c917a (12)
 
 ---
 
