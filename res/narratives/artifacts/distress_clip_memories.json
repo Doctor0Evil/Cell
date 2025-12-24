@@ -1,0 +1,15 @@
+{
+  "id": "distress_clip_memories",
+  "title": "Distress Recording — clip",
+  "speaker": "unknown",
+  "category": "transmission",
+  "text": "[static] ...we're using—your—memories...[echo][reverse]…listen…",
+  "vo_hint": "looped, pitch-shifted phrase with 4 variants.",
+  "audio_variants": [
+    "res://audio/distress/we_use_your_memories_var1.ogg",
+    "res://audio/distress/we_use_your_memories_var2.ogg",
+    "res://audio/distress/we_use_your_memories_var3.ogg",
+    "res://audio/distress/we_use_your_memories_var4.ogg"
+  ],
+  "tags": ["distress", "memories", "transmission"]
+}

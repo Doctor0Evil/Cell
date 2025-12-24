@@ -1,0 +1,11 @@
+date,vendor,department,line_item,amount,type,currency
+2025-11-01,ACME Films,Production,starting_cash,500000,actual,USD
+2025-11-02,Set Build Co,Production,set_build,15000,actual,USD
+2025-11-03,Crew Payroll,Production,payroll,12000,actual,USD
+2025-10-15,Lighting Inc,Production,lighting,8000,budget,USD
+2025-10-20,PostHouse,Post,edit,20000,budget,USD
+2025-12-01,Travel Co,Production,travel,3000,actual,USD
+2025-12-02,Marketing,Marketing,teaser,5000,budget,USD
+2025-11-20,Props Ltd,Production,props,2000,actual,USD
+2025-11-22,Vendor A,Legal,consulting,4000,actual,USD
+2025-11-25,Vendor B,Finance,fees,2500,actual,USD

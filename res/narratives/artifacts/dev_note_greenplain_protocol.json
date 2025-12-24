@@ -1,0 +1,10 @@
+{
+  "id": "dev_note_greenplain_protocol",
+  "title": "Dev Note — GreenPlain Protocol",
+  "speaker": "engineer",
+  "category": "dev_log",
+  "text": "Nav.sys quarantined. Quarantine failed. Recommending cold-burn purge. Do not— DO NOT resync backups without cognitive firewall.",
+  "vo_hint": "clipped, urgent — 'Nav.sys… quarantine failed.'",
+  "audio_clip": "res://audio/logs/dev_note_greenplain_protocol.ogg",
+  "tags": ["nav.sys", "greenplain", "warning", "firewall"]
+}

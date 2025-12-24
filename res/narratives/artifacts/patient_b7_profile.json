@@ -1,0 +1,10 @@
+{
+  "id": "patient_b7_profile",
+  "title": "Personal — Patient #B-7",
+  "speaker": "patient_b7",
+  "category": "neuro_profile",
+  "text": "I keep hearing my mother at 2 a.m.—but when I look, her mouth is static. The chip says she never spoke these words.",
+  "vo_hint": "intimate whisper — 'You sing my name.'",
+  "audio_clip": "res://audio/logs/patient_b7_profile.ogg",
+  "tags": ["neurochip", "memory", "hallucination"]
+}

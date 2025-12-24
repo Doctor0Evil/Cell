@@ -1,0 +1,15 @@
+:root{--bg:#0f1720;--card:#111827;--accent:#c0422a;--muted:#94a3b8;--glass:rgba(255,255,255,0.03)}
+*{box-sizing:border-box}
+body,html,#root{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif;background:linear-gradient(180deg,var(--bg),#0b1220);color:#e6eef8}
+.app-root{display:flex;min-height:100vh}
+.header{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-bottom:1px solid rgba(255,255,255,0.03)}
+.left-nav{width:220px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);padding:16px;border-right:1px solid rgba(255,255,255,0.03)}
+.main{flex:1;padding:20px}
+.kpi-row{display:flex;gap:16px;margin-bottom:16px}
+.kpi-card{background:var(--card);padding:16px;border-radius:8px;flex:1;box-shadow:0 1px 0 rgba(255,255,255,0.02)}
+.gantt-panel{height:220px;background:var(--glass);border-radius:8px;padding:12px}
+.tabs{background:var(--card);padding:12px;border-radius:8px}
+.audit-log{margin-top:12px;background:rgba(255,255,255,0.02);padding:12px;border-radius:6px;height:140px;overflow:auto}
+.small-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:6px;color:var(--muted)}
+.role-pill{background:#101827;padding:6px 10px;border-radius:999px;color:var(--muted);border:1px solid rgba(255,255,255,0.02)}
+.upload{margin-top:8px}

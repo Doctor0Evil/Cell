@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  api:
+    build: ./api
+    working_dir: /app
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+    command: npm run dev
+    ports:
+      - 4000:4000
+  web:
+    build: ./web
+    working_dir: /app
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    command: npm run dev
+    ports:
+      - 5173:5173
