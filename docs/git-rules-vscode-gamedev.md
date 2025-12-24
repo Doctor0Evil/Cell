@@ -261,20 +261,17 @@ Agents should enforce PR discipline aligned with game-dev best practices:
   - How to test (e.g., which level/scene to open).
   - Any asset or content implications (new sounds, shaders, scenes).
 
-### Client-side rate guard (recommended)
+### Companion mentor: CellCompanionHorrorAssetMentor
 
-To prevent IDEs and automation from exceeding provider rate limits or triggering abuse flags, add a strict client-side guard and bind it to any editor-side tooling or MCP bridges. We recommend adding `res/scripts/tools/cell_ide_rate_guard.gd` as an autoload for editor tooling. Suggested usage:
+Add a companion mentor node to help IDEs and agents generate and integrate horror assets safely and reproducibly. Place the file at `res/scripts/ai/cell_companion_horror_asset_mentor.gd` and register it as an autoload or call it from your editor bridge.
 
-- Check `CellIDERateGuard.can_send_request()` before each external call; when `true` call `CellIDERateGuard.register_request()` immediately before the request.  
-- If `can_send_request()` is `false`, log a clear warning (e.g., `RATE_GUARD_BLOCKED`) and abort that iteration instead of retrying rapidly.  
-- Default guidance: `WINDOW_SECONDS = 60.0`, `MAX_REQUESTS_PER_WINDOW = 45`, and a per-iteration cap of 10 tasks.  
-- On provider 429 responses, back off exponentially and surface the error rather than retrying to exhaustion.
+Recommended behavior:
 
-This script is included in the repo at `res/scripts/tools/cell_ide_rate_guard.gd` and should be referenced by any MCP/IDE integrations and documented in tooling READMEs.
+- The mentor exposes: `suggest_asset_pipeline(concept)`, `build_horror_prompt(region, asset_focus)`, `suggest_safe_sources()`, and `get_attribution_instructions(license_type)`.
+- Use `suggest_asset_pipeline()` to drive per-asset checklists and bind pipeline steps to CI checks (lint, size, palette, license metadata).
+- Before committing assets, query `get_attribution_instructions()` to ensure proper attribution for CC-BY assets and refuse import on unknown licenses.
 
-2. Agents must **not** request or store secrets/tokens in the repository:
-- Use platform features (e.g., GitHub Actions secrets) for authentication.
-- Never embed personal access tokens, GITHUB_SECRETS, or similar in code or config.
+This companion is included in the repository at `res/scripts/ai/cell_companion_horror_asset_mentor.gd` and can be used by IDE plugins or external MCP agents to keep asset creation compliant and reproducible.
 
 ---
 
