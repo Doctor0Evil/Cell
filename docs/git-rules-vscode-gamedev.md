@@ -271,7 +271,15 @@ Recommended behavior:
 - Use `suggest_asset_pipeline()` to drive per-asset checklists and bind pipeline steps to CI checks (lint, size, palette, license metadata).
 - Before committing assets, query `get_attribution_instructions()` to ensure proper attribution for CC-BY assets and refuse import on unknown licenses.
 
-This companion is included in the repository at `res/scripts/ai/cell_companion_horror_asset_mentor.gd` and can be used by IDE plugins or external MCP agents to keep asset creation compliant and reproducible.
+### Horror art pipeline mentor: CellHorrorArtPipelineMentor
+
+Add a horror art pipeline mentor at `res/scripts/ai/cell_horror_art_pipeline_mentor.gd` to provide asset teams and IDE agents with:
+
+- Reusable pipeline steps: blockout → mood → detail → Godot prep → integration → profile → document.
+- A recommended folder structure rooted at `res/ASSETS`, `res/scenes`, and `res/scripts` to keep assets, scenes, and scripts grouped by feature/entity for easy tracing and PR reviews.
+- Practical tips for environment art, character concept prompts, and night-vision shader guidance.
+
+Register this script as an autoload (or call from the same PromptHub the other mentor uses) so IDE bridges can request pipeline steps and folder guidance automatically.
 
 ---
 
