@@ -15,10 +15,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Godot 4
-        uses: firebelley/setup-godot@v1
+        uses: chickensoft-games/setup-godot@v2
         with:
+          # Match your project version
           version: '4.2.1'
           use-dotnet: false
+          include-templates: false
 
       - name: Run TestRunner scene (headless)
         run: |
