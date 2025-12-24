@@ -1,4 +1,3 @@
-# File: res/scripts/tools/cell_ide_rate_guard.gd
 extends Node
 class_name CellIDERateGuard
 
@@ -6,7 +5,7 @@ class_name CellIDERateGuard
 # Attach as an autoload or instantiate inside your tooling bridge.
 
 const WINDOW_SECONDS: float = 60.0
-const MAX_REQUESTS_PER_WINDOW: int = 45  # Keep well below typical 60/hour unauthenticated & 1,000/hour GITHUB_TOKEN repo limits. [web:10]
+const MAX_REQUESTS_PER_WINDOW: int = 45  # Keep well below typical 60/hour unauthenticated & 1,000/hour GITHUB_TOKEN repo limits.
 
 var _window_start_time: float = 0.0
 var _request_count_in_window: int = 0
