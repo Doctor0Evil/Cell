@@ -1,22 +1,17 @@
-<!-- PR template for Loreway dialogue integration -->
+<!-- Pull Request Template -->
 
 ## Summary
 
-(One-line summary of the change)
+Region scaffolding: missing scenes, runtimes, and registry fields.
 
-## Implementation
+This PR:
+- Adds placeholder region scenes for Iron Hollow, Cold Verge, and Red Silence.
+- Adds minimal runtime scripts for each region.
+- Expands `CellContentRegistry` with tags, tileset/ambience keys, spawn/loot tables, contamination risk, and `runtime_script_path`.
+- Adds placeholder enemy and loot scenes to make the scenes loadable in CI.
+- Adds `scripts/tests/test_region_registry.gd` smoke test and `scripts/tools/region_registry_verifier.gd`.
 
-- Bullet list of changes
+CI: the GitHub Actions workflow runs the Godot TestRunner via:
+`godot4 --headless --quiet --path . --quit --run res://scenes/tests/TestRunner.tscn`
 
-## How to test
-
-- Steps to run test scene and unit scripts
-- Run JSON validation: `python tools/validate_dialogue_json.py --schema res/narrative/_schema/dialogue_schema.json --dir res/narrative/loreway/dialogue`
-
-## Risks & Notes
-
-- Any known caveats
-
-## Changelog
-
-- Add entries as needed
+Please review; this PR is intended to be a safe scaffolding pass — future PRs will replace placeholders with real content and tune spawn tables / ambience.
