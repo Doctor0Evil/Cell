@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://ynfeqfuj2fch"
+
+[deps]
+
+files=["res://tools/tryognik-dashboard/api/sample_data/sample_budget.vendor.translation", "res://tools/tryognik-dashboard/api/sample_data/sample_budget.department.translation", "res://tools/tryognik-dashboard/api/sample_data/sample_budget.line.translation", "res://tools/tryognik-dashboard/api/sample_data/sample_budget.amount.translation", "res://tools/tryognik-dashboard/api/sample_data/sample_budget.type.translation", "res://tools/tryognik-dashboard/api/sample_data/sample_budget.currency.translation"]
+
+source_file="res://tools/tryognik-dashboard/api/sample_data/sample_budget.csv"
+dest_files=["res://tools/tryognik-dashboard/api/sample_data/sample_budget.vendor.translation", "res://tools/tryognik-dashboard/api/sample_data/sample_budget.department.translation", "res://tools/tryognik-dashboard/api/sample_data/sample_budget.line.translation", "res://tools/tryognik-dashboard/api/sample_data/sample_budget.amount.translation", "res://tools/tryognik-dashboard/api/sample_data/sample_budget.type.translation", "res://tools/tryognik-dashboard/api/sample_data/sample_budget.currency.translation"]
+
+[params]
+
+compress=true
+delimiter=0
