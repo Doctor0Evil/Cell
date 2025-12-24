@@ -1,0 +1,10 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "sniper_corridor"
+display_name = "Sniper Corridor"
+description = "Lone shots in long, empty corridors mean everything."
+
+status_rules = { "GLOBAL": { "scoped_accuracy_mult": 1.20, "hipfire_penalty_mult": 0.90 } }

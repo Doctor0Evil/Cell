@@ -4,6 +4,12 @@ class_name GameState
 var current_region_id: StringName = &""
 var player_scene_path: String = "res://scenes/player/Player.tscn"
 var current_profile_id: StringName = &""
+var inventory: Array = []
+
+# Optional: runtime handle to the global ambience player for test/debug hooks
+var extreme_ambience_player: Node = null
+# Optional: runtime handle to the region-specific 3D ambience controller (e.g., Ashveil)
+var extreme_ambience_controller: Node = null
 
 var alert_level: float = 0.0
 var player_sanity: float = 1.0
@@ -24,6 +30,30 @@ signal player_collapsed(reason: StringName)
 func _ready() -> void:
     DebugLog.log("GameState", "READY", {})
 
+    # Handle CLI flags for dev usage when running outside editor.
+    if not Engine.is_editor_hint():
+        _handle_command_line_flags()
+
+func _handle_command_line_flags() -> void:
+    var args := OS.get_cmdline_args()
+    if args.is_empty():
+        return
+
+    for a in args:
+        match String(a):
+            "--run-tests":
+                DebugLog.log("GameState", "CMDLINE_RUN_TESTS", {"args": args})
+                # Switch to test runner scene and exit when done.
+                get_tree().change_scene_to_file("res://scenes/tests/TestRunner.tscn")
+                return
+            "--dev-harness":
+                DebugLog.log("GameState", "CMDLINE_DEV_HARNESS", {"args": args})
+                get_tree().change_scene_to_file("res://scenes/debug/DevHarness.tscn")
+                return
+            _:
+                # Ignore other flags for now.
+                pass
+
 func reset_for_new_run() -> void:
     alert_level = 0.0
     player_sanity = 1.0
@@ -40,8 +70,9 @@ func reset_for_new_run() -> void:
 
 func load_region(region_id: StringName) -> void:
     current_region_id = region_id
-    var region_data := CellContentRegistry.get_region(region_id)
-    if region_data.is_empty():
+    var registry: Node = get_node_or_null("/root/CellContentRegistry")
+    var region_data: Dictionary = {} if registry == null else registry.get_region(region_id)
+    if region_data == null or (region_data is Dictionary and region_data.is_empty()):
         push_error("Unknown region '%s'." % region_id)
         DebugLog.log("GameState", "REGION_LOAD_FAILED", {"region_id": String(region_id)})
         return
@@ -70,3 +101,8 @@ func on_player_collapse(reason: StringName) -> void:
     DebugLog.log("GameState", "PLAYER_COLLAPSE", {"reason": String(reason)})
     player_collapsed.emit(reason)
     get_tree().call_group("runtime", "on_player_collapsed", reason)
+
+# Minimal game-time helper for simulations (minutes since epoch).
+func get_game_minutes() -> float:
+    return float(Time.get_unix_time_from_system()) / 60.0
+

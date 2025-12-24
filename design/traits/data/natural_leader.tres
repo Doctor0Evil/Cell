@@ -1,0 +1,12 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "natural_leader"
+display_name = "Natural Leader"
+description = "People do better around you."
+
+influence_delta = 2.0
+status_rules = { "GLOBAL": { "companion_effectiveness_mult": 1.10 } }
+respect_deltas = { "SECTION_COMMAND": 10 }

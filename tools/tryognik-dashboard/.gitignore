@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env
+.vscode/
+api/tmp/
+web/node_modules/
+api/node_modules/

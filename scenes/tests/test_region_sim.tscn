@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[node name="TestRegionSim" type="Node"]
+script = ExtResource( 1 )
+
+[ext_resource path="res://scripts/tests/test_region_sim.gd" type="Script" id=1]

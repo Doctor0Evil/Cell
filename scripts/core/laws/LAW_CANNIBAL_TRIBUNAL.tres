@@ -1,0 +1,19 @@
+[gd_resource type="LawDefinition" load_steps=2 format=2]
+[ext_resource path="res://scripts/core/law_definition.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "LAW_CANNIBAL_TRIBUNAL"
+display_name = "Cannibal Tribunal"
+description = "Permits ritual cannibalism in return for protein distribution and order. Raises infection risk and cosmic suspicion."
+
+category = "civic"
+
+enables_tags = ["cannibalism"]
+
+protein_consumption_mult = 0.9
+infection_risk_mult = 1.5
+
+on_crime_events = { "cannibalism": 0.8 }
+cosmic_trigger_chance = 0.05
+cosmic_outcome_ids = ["plague_flesh_eater"]

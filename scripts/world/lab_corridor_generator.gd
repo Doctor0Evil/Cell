@@ -3,6 +3,7 @@ class_name LabCorridorGenerator
 
 @export var width: int = 32
 @export var height: int = 12
+@export var debug_enabled: bool = true
 
 @export var tileset: TileSet
 
@@ -18,7 +19,7 @@ const PROP_CONTAINMENT_GROUP := "CONTAINMENT_TUBE"
 const PROP_TERMINAL_GROUP := "CORRUPTED_TERMINAL"
 const OVERLAY_GROWTH_GROUP := "GROWTH_OVERLAY"
 
-var _tile_lookup: Dictionary = {}
+var _tile_lookup: Dictionary = {} # group -> Array[Dictionary{source_id, atlas_coords: Vector2i}]
 
 func _ready() -> void:
     randomize()
@@ -30,11 +31,12 @@ func _build_tile_lookup() -> void:
     _tile_lookup.clear()
 
     func add_group(group: String, names: Array) -> void:
-        _tile_lookup[group] = []
+        var entries: Array = []
         for name in names:
             var match := _get_tile_by_name(name)
-            if match:
-                _tile_lookup[group].append(match)
+            if not match.is_empty():
+                entries.append(match)
+        _tile_lookup[group] = entries
 
     add_group(FLOOR_FLESH_GROUP, [
         "floor_flesh_panel_a",
@@ -73,19 +75,25 @@ func _build_tile_lookup() -> void:
     ])
 
 func _get_tile_by_name(tile_name: String) -> Dictionary:
-    for source_id in tileset.get_source_count():
+    if tileset == null:
+        return {}
+
+    var source_count := tileset.get_source_count()
+    for i in range(source_count):
+        var source_id := tileset.get_source_id(i)
         var src := tileset.get_source(source_id)
         if src == null:
             continue
-        if src.resource_name == tile_name:
-            if src is TileSetAtlasSource:
-                var tile_ids := src.get_tiles_ids()
-                if tile_ids.size() > 0:
-                    var first_id := tile_ids[0]
-                    return {
-                        "source_id": source_id,
-                        "atlas_coords": first_id
-                    }
+        if src.resource_name == tile_name and src is TileSetAtlasSource:
+            var tile_ids := src.get_tiles_ids()
+            if tile_ids.size() == 0:
+                continue
+            var first_id: Vector2i = tile_ids[^1]
+            return {
+                "source_id": source_id,
+                "atlas_coords": first_id
+            }
+
     return {}
 
 func _generate_corridor() -> void:
@@ -93,31 +101,39 @@ func _generate_corridor() -> void:
     _walls.clear()
     _props.clear()
 
-    for x in width:
-        for y in height:
-            var pos := Vector2i(x, y)
+    if debug_enabled:
+        DebugLog.log("LabCorridorGenerator", "GENERATE_START", {"width": width, "height": height})
+
+    for x in range(width):
+        for y in range(height):
+            var cell := Vector2i(x, y)
             var is_edge_y := (y == 0 or y == height - 1)
             var is_edge_x := (x == 0 or x == width - 1)
 
+            # Base floor selection
             var base_group := FLOOR_METAL_GROUP
             if randf() < 0.25:
                 base_group = FLOOR_FLESH_GROUP
-
             if randf() < 0.15 and y > 1 and y < height - 2:
                 base_group = FLOOR_BLOOD_GROUP
 
-            _set_tile_random(_floor, base_group, pos)
+            _set_tile_random(_floor, base_group, cell)
 
+            # Walls around edges
             if is_edge_y or is_edge_x:
-                _set_tile_random(_walls, WALL_LAB_GROUP, pos)
+                _set_tile_random(_walls, WALL_LAB_GROUP, cell)
 
+            # Props and overlays inside corridor
             if not is_edge_x and not is_edge_y:
                 if randf() < 0.06 and y == 1:
-                    _set_tile_random(_props, PROP_CONTAINMENT_GROUP, pos)
+                    _set_tile_random(_props, PROP_CONTAINMENT_GROUP, cell)
                 elif randf() < 0.04 and y == height - 2:
-                    _set_tile_random(_props, PROP_TERMINAL_GROUP, pos)
+                    _set_tile_random(_props, PROP_TERMINAL_GROUP, cell)
                 elif randf() < 0.08:
-                    _set_tile_random(_props, OVERLAY_GROWTH_GROUP, pos)
+                    _set_tile_random(_props, OVERLAY_GROWTH_GROUP, cell)
+
+    if debug_enabled:
+        DebugLog.log("LabCorridorGenerator", "GENERATE_FINISH", {"floor_tiles": _floor.get_used_cells().size()})
 
 func _set_tile_random(tilemap: TileMapLayer, group: String, cell: Vector2i) -> void:
     if not _tile_lookup.has(group):
@@ -125,5 +141,9 @@ func _set_tile_random(tilemap: TileMapLayer, group: String, cell: Vector2i) -> v
     var arr: Array = _tile_lookup[group]
     if arr.is_empty():
         return
+
     var pick: Dictionary = arr[randi() % arr.size()]
-    tilemap.set_cell(0, cell, pick["source_id"], pick["atlas_coords"])
+    var source_id: int = pick["source_id"]
+    var atlas_coords: Vector2i = pick["atlas_coords"]
+
+    tilemap.set_cell(cell, source_id, atlas_coords)

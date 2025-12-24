@@ -1,0 +1,14 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "containment_face"
+display_name = "Containment Face"
+description = "Looks like someone who ran a console and lost patience gracefully."
+
+influence_delta = 2.0
+
+status_rules = { "CONTAINMENT_ZONE": { "negotiation_bonus": 0.15, "barter_bonus": 0.10 } }
+
+respect_deltas = { "ADMIN_CORE": 5 }

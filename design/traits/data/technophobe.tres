@@ -1,0 +1,11 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "technophobe"
+display_name = "Technophobe"
+description = "Too many blinking things make you suspicious."
+
+logic_delta = -1.0
+status_rules = { "GLOBAL": { "hack_penalty_mult": 0.80, "mechanical_detection_bonus": 0.10 } }

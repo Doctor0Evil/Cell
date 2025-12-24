@@ -70,15 +70,20 @@ func tick_oxygen_with_suit(
     })
     return death
 
+func apply_lox_bottle(amount: float) -> void:
+	if vitality_system == null:
+		return
+	vitality_system.use_lox_bottle(amount)
+	oxygen = min(oxygen_max, oxygen + amount * vitality_system.get_oxygen_efficiency())
+	DebugLog.log("PlayerPools", "LOX_BOTTLE", {
+		"amount": amount,
+		"oxygen": oxygen,
+		"wellness": vitality_system.wellness,
+		"vitality": vitality_system.vitality,
+		"temper": vitality_system.temper
+	})
+
+# Deprecated compatibility wrapper - prefer `apply_lox_bottle(amount)` instead.
 func apply_oxygen_capsule(amount: float) -> void:
-    if vitality_system == null:
-        return
-    vitality_system.use_oxygen_capsule(amount)
-    oxygen = min(oxygen_max, oxygen + amount * vitality_system.get_oxygen_efficiency())
-    DebugLog.log("PlayerPools", "OXYGEN_CAPSULE", {
-        "amount": amount,
-        "oxygen": oxygen,
-        "wellness": vitality_system.wellness,
-        "vitality": vitality_system.vitality,
-        "temper": vitality_system.temper
-    })
+	DebugLog.log("PlayerPools", "DEPRECATION", {"deprecated": "apply_oxygen_capsule", "recommended": "apply_lox_bottle"})
+	apply_lox_bottle(amount)

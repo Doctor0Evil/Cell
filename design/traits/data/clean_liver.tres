@@ -1,0 +1,10 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "clean_liver"
+display_name = "Clean Liver"
+description = "You process poisons and chems better."
+
+status_rules = { "GLOBAL": { "chem_negative_duration_mult": 0.5 } }

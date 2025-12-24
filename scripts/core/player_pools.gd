@@ -80,9 +80,15 @@ func apply_meal(protein_gain: float) -> void:
     if protein > protein_max * 0.3 and starving_stacks > 0:
         starving_stacks -= 1
 
+func apply_lox_bottle(amount: float) -> void:
+	# New LOX-aware API: amount is Standard Liters (SL) to be converted via vitality system
+	vitality_system.use_lox_bottle(amount)
+	oxygen = min(oxygen_max, oxygen + amount * vitality_system.get_oxygen_efficiency())
+
+# Deprecated compatibility wrapper - prefer `apply_lox_bottle(amount)` instead.
 func apply_oxygen_capsule(amount: float) -> void:
-    vitality_system.use_oxygen_capsule(amount)
-    oxygen = min(oxygen_max, oxygen + amount * vitality_system.get_oxygen_efficiency())
+	DebugLog.log("PlayerPools", "DEPRECATION", {"deprecated": "apply_oxygen_capsule", "recommended": "apply_lox_bottle"})
+	apply_lox_bottle(amount)
 
 func apply_rest(hours: float) -> void:
     var stamina_recover := hours * 12.0

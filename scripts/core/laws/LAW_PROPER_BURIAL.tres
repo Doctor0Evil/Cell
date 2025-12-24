@@ -1,0 +1,15 @@
+[gd_resource type="LawDefinition" load_steps=2 format=2]
+[ext_resource path="res://scripts/core/law_definition.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "LAW_PROPER_BURIAL"
+display_name = "Proper Burial"
+description = "Mandates respectful corpse handling and forbids organ harvesting; lowers infection risk but modestly increases logistical burden."
+
+category = "civic"
+forbids_tags = ["organ_harvest", "corpse_pit"]
+
+infection_risk_mult = 0.8
+settlement_stability_delta = 0.02
+on_disaster_events = { "corpse_overflow": 0.15 }

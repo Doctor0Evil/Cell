@@ -1,0 +1,33 @@
+name: Validate Dialogue JSON Schema
+
+on:
+  push:
+    branches: [ 'feat/loreway-dialogue-integration', 'main' ]
+  pull_request:
+    branches: [ 'main' ]
+
+jobs:
+  validate-json:
+    name: Dialogue JSON Schema Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install jsonschema
+
+      - name: Run dialogue JSON validation
+        run: |
+          python tools/validate_dialogue_json.py \
+            --schema res/narrative/_schema/dialogue_schema.json \
+            --dir res/narrative/loreway/dialogue \
+            --pattern "**/*.json"

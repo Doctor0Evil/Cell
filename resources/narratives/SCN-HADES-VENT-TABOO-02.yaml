@@ -1,0 +1,132 @@
+NarrativeScenes:
+  - id: SCN-HADES-VENT-TABOO-02
+    scope: "local"
+    locationid: PLCORBITALHADES01
+    entryconditions:
+      - "player_within_3m_of_vent"
+      - "player_uses_voice_input"
+      - "night_cycle_active"
+      - "taboo_active:TABSVENTSILENCE01"
+    beats:
+      - id: "BEAT-CALL-INTO-DARK"
+        description: >
+          Player’s spoken line is swallowed by the ductwork; a flat,
+          dead reverb hangs for a moment. After half a second, the
+          same words return from the vent, thinner, with an extra,
+          damp breath braided under the syllables. UI desaturates
+          slightly; oxygen warnings flicker, then pretend nothing
+          happened.
+        horrorfunction: "Uncanny"
+        systemhooks:
+          - "postplayervoice:route_to_vent_bus"
+          - "screen_desaturate:0.15_over_2s"
+          - "flash_oxygen_warning_once"
+      - id: "BEAT-HOWLER-LISTENS"
+        description: >
+          A low, band-limited hiss rises behind the grill like a
+          detuned radio hunting for a station. The signal stretches
+          into metal panting, each exhale scraping along the ducts.
+          Somewhere in the cargo maze, a Growler answers with a
+          strangled half-bark, half-sob that clips as if the ship
+          itself cut the feed.
+        horrorfunction: "Dread"
+        systemhooks:
+          - "play_sfx:VENT_HISS_LOCKON"
+          - "play_sfx:DISTANT_GROWLER_RESPONSE"
+          - "disable_minimap_pings:10s"
+      - id: "BEAT-PACK-REROUTING"
+        description: >
+          Corridor signs on bulkheads jitter, briefly pointing in
+          wrong directions before realigning. Map markers glitch, then
+          snap to new paths. On the motion tracker, a loose scatter of
+          contacts turns as one, angling toward the player’s deck.
+          Taboo tooltip updates itself: 'The vents remember routes.'
+        horrorfunction: "MoralAnxiety"
+        systemhooks:
+          - "reroute_growler_paths_toward_player_deck"
+          - "increase_local_threat_level:+1_step"
+          - "update_taboo_tooltip:TABSVENTSILENCE01"
+    linkedevents: ["EVMOONHOWLDEC2063"]
+    linkeddialogueunits: ["DLG-VENT-TABOO-LOGKEEPER-01"]
+DialogueUnits:
+  - id: DLG-VENT-TABOO-LOGKEEPER-01
+    sceneid: "SCN-HADES-VENT-TABOO-02"
+    speakers: ["CHRLOGKEEPER01"]
+    linelimit: 3
+    maxwordsperline: 18
+    styleprofile: "shellshocked-matter-of-fact"
+    lines:
+      - speakerid: "CHRLOGKEEPER01"
+        text: "Talk into the ducts if you want. The ship repeats you in a voice it keeps."
+        intent: "imply_rule"
+        reliability: "reliable"
+        triggers: "on-first-break:TABSVENTSILENCE01"
+      - speakerid: "CHRLOGKEEPER01"
+        text: "Growlers used to hunt by smell; now that blue thing outside teaches shortcuts."
+        intent: "evoke_threat"
+        reliability: "ambiguous"
+      - speakerid: "CHRLOGKEEPER01"
+        text: "Sometimes I spoke and nothing came back—until one time it answered with an extra breath."
+        intent: "reveal_flaw"
+        reliability: "reliable"
+    folkloresources: "INTERNALCELLFOLKPOOLPOL-01"
+    externalreferenceallowed: false
+Events:
+  - id: EVMOONHOWLDEC2063
+    repeatablemicroevents:
+      - "SCN-HADES-VENT-TABOO-02"
+    systemiclinks:
+      - trigger: "taboo_broken:TABSVENTSILENCE01"
+        effect:
+          - "local_growler_aggression++"
+          - "update_navmesh_preference:vents_toward_player"
+LorewayNarrativeTemplate:
+  TemplateId: "LWT-GROWLERS-VENTS-01"
+  MaxBeats: 3
+
+  SupportedModes:
+    - "Cosmic"
+    - "Body"
+    - "Survival"
+
+  SupportedFunctions:
+    - "Dread"
+    - "Uncanny"
+    - "MoralAnxiety"
+
+  LandscapeMotifs:
+    - "vent labyrinth sweating cold condensation"
+    - "frost-whitened bulkheads scored by claws"
+    - "cargo maze stacked with gutted containers"
+    - "half-lit maintenance catwalks over dark shafts"
+    - "oxygen-scarred walls peppered with failed patch-jobs"
+
+  SpiritMotifs:
+    - "thin blue corona clinging to the station’s ribs"
+    - "radio hiss that tastes like old blood on the teeth"
+    - "breath that arrives before the sound"
+    - "invisible weight listening at every grille"
+    - "moonlight smeared across metal like dried antiseptic"
+
+  HumanMiseryMotifs:
+    - "oxygen debt making thoughts drag in the skull"
+    - "starving bellies arguing louder than the alarms"
+    - "tremor in the fingers from reusing filters too long"
+    - "sleep stolen in thirty-second blinks between howls"
+    - "paranoia that every voice over comms is already dead"
+
+  TabooIds:
+    - "TABSVENTSILENCE01"
+
+  SpiritIds:
+    - "SPRTAZUREHOWLER01"
+
+  BeatPrompts:
+    - "Your own words do not come back right from the vent."
+    - "Something deeper in the ducts adjusts its breathing to yours."
+    - "The station quietly updates its idea of how to reach you."
+
+  MaxLinesPerUnit: 5
+  MaxWordsPerLine: 18
+  RequireContradictionLine: true
+  RequireImpliedRuleLine: true

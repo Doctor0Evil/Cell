@@ -4,11 +4,13 @@ class_name RegionManager
 
 @export var player_spawn: Node3D
 @export var ambience_controller_path: NodePath
+@export var ambience_player_path: NodePath
 @export var enemy_spawner_root: NodePath
 @export var loot_spawner_root: NodePath
 
 # Cached references
 var _ambience_controller: Node = null
+var _ambience_player: ExtremeHorrorAmbiencePlayer = null
 var _enemy_spawner_root: Node = null
 var _loot_spawner_root: Node = null
 
@@ -33,12 +35,14 @@ func _ready() -> void:
 
     region_id = GameState.current_region_id
     _ambience_controller = get_node_or_null(ambience_controller_path)
+    _ambience_player = get_node_or_null(ambience_player_path)
     _enemy_spawner_root = get_node_or_null(enemy_spawner_root)
     _loot_spawner_root = get_node_or_null(loot_spawner_root)
 
     _load_region_descriptor()
     _spawn_player()
     _apply_region_modifiers()
+    _apply_region_audio_profile()
     _spawn_initial_enemies()
     _spawn_initial_loot()
 
@@ -48,13 +52,32 @@ func _ready() -> void:
         "tags": region_tags.duplicate()
     })
 
+func _apply_region_audio_profile() -> void:
+    if not _ambience_player:
+        return
+
+    # Simple mapping based on difficulty / tags.
+    if region_difficulty <= 1:
+        _ambience_player.switch_ambience("facility_low_hum")
+    elif region_difficulty == 2:
+        _ambience_player.switch_ambience("meat_corridor")
+    elif region_difficulty >= 3:
+        _ambience_player.switch_ambience("reactor_spine")
+
+    # Allow tags to augment ambience choices (e.g., 'vent', 'pursuit_zone')
+    if region_tags.has("vent"):
+        _ambience_player.switch_ambience("vent_draft")
+    if region_tags.has("pursuit_zone"):
+        _ambience_player.switch_ambience("pursuit_static", 2.0)
+
 # -------------------------------------------------------------------
 # REGION DESCRIPTOR
 # -------------------------------------------------------------------
 
 func _load_region_descriptor() -> void:
-    var region_data := CellContentRegistry.get_region(region_id)
-    if region_data.is_empty():
+    var registry: Node = get_node_or_null("/root/CellContentRegistry")
+    var region_data: Dictionary = {} if registry == null else registry.get_region(region_id)
+    if region_data == null or (region_data is Dictionary and region_data.is_empty()):
         DebugLog.log("RegionManager", "REGION_DESCRIPTOR_MISSING", {
             "region_id": String(region_id)
         })
@@ -110,11 +133,18 @@ func _spawn_player() -> void:
 # -------------------------------------------------------------------
 
 func _apply_region_modifiers() -> void:
-    var region_data := CellContentRegistry.get_region(GameState.current_region_id)
+    var registry: Node = get_node_or_null("/root/CellContentRegistry")
+    var gs: Node = get_node_or_null("/root/GameState")
+    var region_data: Dictionary = {} if registry == null else registry.get_region(gs.current_region_id if gs else GameState.current_region_id)
 
-    GameState.current_region_cold = float(region_data.get("temperature_modifier", 0.0))
-    GameState.current_region_stress = float(region_data.get("oxygen_modifier", 0.0))
-    GameState.contamination_level = float(region_data.get("infection_bias", 0.0))
+    if gs and gs is GameState:
+        gs.current_region_cold = float(region_data.get("temperature_modifier", 0.0))
+        gs.current_region_stress = float(region_data.get("oxygen_modifier", 0.0))
+        gs.contamination_level = float(region_data.get("infection_bias", 0.0))
+    else:
+        GameState.current_region_cold = float(region_data.get("temperature_modifier", 0.0))
+        GameState.current_region_stress = float(region_data.get("oxygen_modifier", 0.0))
+        GameState.contamination_level = float(region_data.get("infection_bias", 0.0))
 
     # Optionally inform ambience controller of darkness level and tension.
     if _ambience_controller and _ambience_controller.has_method("apply_region_profile"):
@@ -202,7 +232,7 @@ func _spawn_initial_loot() -> void:
         return
 
     # loot_spawn_table entry example:
-    # { "id": "OXYGEN_CAPSULE", "min": 1, "max": 3, "group": "oxygen_cache" }
+    # { "id": "CON_LOX_CRYO_CORE_STD", "min": 1, "max": 3, "group": "oxygen_cache" }
     for entry in loot_spawn_table:
         var item_id := String(entry.get("id", ""))
         var min_count := int(entry.get("min", 0))

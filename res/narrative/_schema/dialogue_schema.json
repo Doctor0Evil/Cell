@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Loreway Dialogue Schema",
+  "type": "object",
+  "required": ["id", "title", "nodes"],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "region_tags": { "type": "array", "items": { "type": "string" } },
+        "factions": { "type": "array", "items": { "type": "string" } },
+        "narrative_tags": { "type": "array", "items": { "type": "string" } },
+        "priority": { "type": "number" },
+        "version": { "type": "integer" },
+        "author": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string", "enum": ["line", "choice", "end"] },
+          "speaker": { "type": "string" },
+          "text": { "type": "string" },
+          "next": { "type": "string" },
+          "narrative_tags": { "type": "array", "items": { "type": "string" } },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "text"],
+              "properties": {
+                "id": { "type": "string" },
+                "text": { "type": "string" },
+                "label": { "type": "string" },
+                "action_type": { "type": "string" },
+                "action_payload": { "type": "object" },
+                "conditions": { "type": "array", "items": { "type": "object" } },
+                "checks": { "type": "array", "items": { "type": "object" } },
+                "effects": { "type": "array", "items": { "type": "object" } },
+                "effects_success": { "type": "array", "items": { "type": "object" } },
+                "effects_fail": { "type": "array", "items": { "type": "object" } },
+                "on_success_next": { "type": "string" },
+                "on_fail_next": { "type": "string" },
+                "next": { "type": "string" }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

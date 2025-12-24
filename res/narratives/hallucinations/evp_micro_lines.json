@@ -1,0 +1,27 @@
+{
+  "id": "evp_micro_lines_core",
+  "category": "evp_one_shots",
+  "lines": [
+    {
+      "id": "evp_listen_ru",
+      "text": "Слушай.",
+      "language": "ru",
+      "audio_clip": "res://audio/hallucinations/evp_listen_ru.ogg",
+      "tags": ["listen", "command", "ru"]
+    },
+    {
+      "id": "evp_thank_you_close",
+      "text": "Спасибо.",
+      "language": "ru",
+      "audio_clip": "res://audio/hallucinations/evp_thank_you_close.ogg",
+      "tags": ["thank_you", "close", "binaural"]
+    },
+    {
+      "id": "evp_you_took_our_hands",
+      "text": "You took our hands.",
+      "language": "en",
+      "audio_clip": "res://audio/hallucinations/evp_you_took_our_hands.ogg",
+      "tags": ["anger", "layered", "accusation"]
+    }
+  ]
+}

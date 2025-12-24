@@ -451,7 +451,7 @@ var regions := {
 "temperature_modifier": -0.5,
 "oxygen_modifier": -0.1,
 "primary_threats": ["SPINE_CRAWLER", "BREATHER"],
-"key_loot": ["OXYGEN_CAPSULE", "HEAT_CORE_FRAGMENT", "RATION_CHIP_TIER_I"],
+"key_loot": ["CON_LOX_CRYO_CORE_STD", "HEAT_CORE_FRAGMENT", "RATION_CHIP_TIER_I"],
 "scene_path": "res://scenes/world/ashveil_debris_stratum.tscn"
 },
 "IRON_HOLLOW_SPINAL_TRENCH": {
@@ -469,7 +469,7 @@ var regions := {
 "temperature_modifier": -1.0,
 "oxygen_modifier": -0.3,
 "primary_threats": ["BREATHER", "ASH_EATER", "PULSE_TERROR"],
-"key_loot": ["OXYGEN_CAPSULE", "SUIT_UPGRADE_COLD", "RATION_CHIP_TIER_III"],
+"key_loot": ["CON_LOX_CRYO_CORE_STD", "SUIT_UPGRADE_COLD", "RATION_CHIP_TIER_III"],
 "scene_path": "res://scenes/world/cold_verge_cryo_rim.tscn"
 },
 "RED_SILENCE_SIGNAL_CRADLE": {
@@ -625,7 +625,7 @@ DATA: {
 
 [DEBUG][T=1734280019.03]
 SOURCE: Player
-EVENT: CONSUME_OXYGEN_CAPSULE
+EVENT: CONSUME_LOX_BOTTLE
 DATA: {
 "capsules_remaining": 1,
 "oxygen_seconds_new_total": 211.0,
@@ -776,7 +776,7 @@ func _on_cache_a_entered(body: Node3D) -> void:
     if not _mission_active or _mission_failed:
         return
     if body.is_in_group("player"):
-        _grant_oxygen_capsule()
+        _grant_lox_bottle()
         _set_hud_objective("Oxygen cache A secured. Find cache B or head to extraction.")
         DebugLog.log("MissionColdVergeOxygenRun", "CACHE_A_COLLECTED", {
             "capsules_collected": _capsules_collected
@@ -787,17 +787,17 @@ func _on_cache_b_entered(body: Node3D) -> void:
     if not _mission_active or _mission_failed:
         return
     if body.is_in_group("player"):
-        _grant_oxygen_capsule()
+        _grant_lox_bottle()
         _set_hud_objective("Oxygen cache B secured. Reach extraction.")
         DebugLog.log("MissionColdVergeOxygenRun", "CACHE_B_COLLECTED", {
             "capsules_collected": _capsules_collected
         })
         _cache_b_trigger.monitoring = false
 
-func _grant_oxygen_capsule() -> void:
+func _grant_lox_bottle() -> void:
     _capsules_collected += 1
     GameState.inventory.append({
-        "id": "OXYGEN_CAPSULE",
+        "id": "CON_LOX_CRYO_CORE_STD",
         "stack": 1
     })
     # Optional: flash HUD indicator through a global UI event group.
@@ -2287,7 +2287,7 @@ logic = min(10.0, logic + 0.5 * factor)
 intelligence = min(10.0, intelligence + 0.5 * factor)
 strength = min(10.0, strength + 0.4 * factor)
 
-func apply_oxygen_capsule_effect() -> void:
+func apply_lox_bottle_effect() -> void:
 \# Capsules are powerful but dangerous: improve oxygen efficiency short-term,
 \# slightly stress vitality and temper (long-term side effects).
 yield = min(10.0, yield + 0.2)
@@ -2521,8 +2521,8 @@ func tick_stamina(delta: float, exertion: float, base_recovery: float) -> bool:
 
 # === Oxygen capsule and ration-chip logic ===
 
-func use_oxygen_capsule(strength: float) -> void:
-    # Brutal but useful: more oxygen, but long-term strain.
+func use_lox_bottle(strength: float) -> void:
+    # Brutal but useful (legacy behaviour): more oxygen, but long-term strain.
     var factor := clamp(0.8 + yield * 0.05, 0.8, 1.8)
     oxygen = min(oxygen_max, oxygen + strength * factor)
     wellness = max(0.0, wellness - 2.0)
@@ -2622,7 +2622,7 @@ DATA: {
 
 [DEBUG][T=1734331243.27]
 SOURCE: PlayerVitalitySystem
-EVENT: OXYGEN_CAPSULE_USED
+EVENT: LOX_BOTTLE_USED
 DATA: {
   "strength": 30.0,
   "oxygen_after": 68.1,
@@ -2994,7 +2994,7 @@ func apply_heal(amount: float, protein_cost: float) -> void:
     protein = max(0.0, protein - cost)
     blood = min(blood_max, blood + heal)
 
-func use_oxygen_capsule(strength: float) -> void:
+func use_lox_bottle(strength: float) -> void:
     var factor := clamp(0.8 + yield * 0.05, 0.8, 1.8)
     oxygen = min(oxygen_max, oxygen + strength * factor)
     wellness = max(0.0, wellness - 2.0)
@@ -3718,7 +3718,7 @@ protein = min(protein_max, protein + protein_gain)
 if protein > protein_max * 0.3 and starving_stacks > 0:
 starving_stacks -= 1
 
-func apply_oxygen_capsule(amount: float) -> void:
+func apply_lox_bottle(amount: float) -> void:
 oxygen = min(oxygen_max, oxygen + amount)
 
 func apply_rest(duration_hours: float) -> void:
@@ -3899,8 +3899,8 @@ func apply_meal(protein_gain: float) -> void:
     if protein > protein_max * 0.3 and starving_stacks > 0:
         starving_stacks -= 1
 
-func apply_oxygen_capsule(amount: float) -> void:
-    vitality_system.use_oxygen_capsule(amount)
+func apply_lox_bottle(amount: float) -> void:
+    vitality_system.use_lox_bottle(amount)
     oxygen = min(oxygen_max, oxygen + amount * vitality_system.get_oxygen_efficiency())
 
 func apply_rest(hours: float) -> void:

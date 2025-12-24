@@ -1,0 +1,10 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "spray_and_pray"
+display_name = "Spray and Pray"
+description = "Full auto lovin’. Ammo goes fast, hatred goes faster."
+
+status_rules = { "GLOBAL": { "full_auto_hit_mult": 1.10, "ammo_consumption_mult": 1.50, "ally_stray_chance": 0.10 } }

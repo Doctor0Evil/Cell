@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=2]
+
+[node name="Node" type="Node"]
+script = ExtResource( 1 )
+
+[ext_resource path="res://scenes/test_rootbound_husk.gd" type="Script" id=1]
+
+[node name="Inspector" type="EditorInspector" parent="."]
+
+[node name="SubResource1" type="Resource" parent="."]
+
+
+[connection signal="ready" from="." to="." method="_ready"]

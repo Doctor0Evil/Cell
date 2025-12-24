@@ -1,0 +1,10 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "heavy_sleeper"
+display_name = "Heavy Sleeper"
+description = "Deep, dangerous slumber. You get more rest, but risks increase."
+
+status_rules = { "REST": { "rest_recovery_mult": 1.30, "sleep_ambush_vuln_mult": 1.30, "wake_delay": 1.0 } }

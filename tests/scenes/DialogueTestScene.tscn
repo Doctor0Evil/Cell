@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+
+[node name="DialogueTestScene" type="Node"]
+script = ExtResource( 1 )
+
+[ext_resource path="res://res/scripts/narrative/dialogue_session.gd" type="Script" id=1]
+
+[node name="LorewayBridge" parent="." instance="true"]
+script = ExtResource( 2 )
+
+[ext_resource path="res://res/scripts/narrative/loreway_bridge.gd" type="Script" id=2]
+
+[node name="NPCDialogueTestController" parent="." instance="true"]
+script = ExtResource( 3 )
+
+[ext_resource path="res://tests/scene_scripts/npc_dialogue_test_controller.gd" type="Script" id=3]

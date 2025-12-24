@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3]
+
+[node name="RegionBakeDebug" type="VBoxContainer"]
+
+[node name="Title" type="Label" parent="."]
+text = "Region Baker"
+
+[node name="HBox" type="HBoxContainer" parent="."]
+
+[node name="BakeButton" type="Button" parent="HBox"]
+text = "Bake Selected"
+
+[node name="ValidateButton" type="Button" parent="HBox"]
+text = "Validate Tilesets"
+
+[node name="Log" type="TextEdit" parent="."]
+text = "" 
+read_only = true
+size_flags_vertical = 3
+
+[ext_resource path="res://scripts/debug/region_bake_debug.gd" type="Script" id=1]

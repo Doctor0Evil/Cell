@@ -1,0 +1,16 @@
+Godot Quick Lint Report - 12/18/2025 07:26:28
+
+\n== PoolVector ==
+(none found)
+\n== ExportFileComma ==
+(none found)
+\n== EmptyCalls ==
+(none found)
+\n== ResourceSaverSave ==
+(none found)
+\n== DirAccessMakeDir ==
+(none found)
+\n== IsEqualApproxArgs ==
+(none found)
+
+Note: Patterns are heuristic; inspect each occurrence before applying fixes.

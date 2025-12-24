@@ -1,0 +1,28 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="CELL"
+run/main_scene="res://scenes/ui/MainMenu.tscn"
+config/features=PackedStringArray("4.5")
+
+[autoload]
+
+GameState="res://scripts/core/GameState.gd"
+DebugLog="res://scripts/core/DebugLog.gd"
+AssetRegistry="res://scripts/core/asset_registry.gd"
+Factions="res://scripts/core/faction_system.gd"
+CellContentRegistry="res://scripts/core/cell_content_registry.gd"
+HorrorAssets="res://core/horror_asset_registry.gd"
+SaveSystem="res://scripts/core/save_system.gd"
+RegionSimManager="res://scripts/world/sim/region_sim_manager.gd"
+VentTabooHookBus="res://scripts/narrative/vent_taboo_hook_bus.gd"
+LorewayPersona="res://Cell/Loreway/Runtime/LorewayPersonalitySingleton.gd"

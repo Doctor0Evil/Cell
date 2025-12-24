@@ -1,0 +1,15 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "compartmentalized"
+display_name = "Compartmentalized"
+description = "The horrible things stay boxed; your head stays clearer."
+
+temper_delta = 2.0
+influence_delta = -1.0
+
+status_rules = { "GLOBAL": { "stress_from_atrocities_mult": 0.5 } }
+
+respect_deltas = { "MEDIC_ARCHIVE": 4 }

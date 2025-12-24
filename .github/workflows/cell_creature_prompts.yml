@@ -1,0 +1,58 @@
+name: CELL Creature Prompts
+
+on:
+  push:
+    paths:
+      - "assets/creatures/**"
+      - "cell/creatures/**"
+      - "tools/pipeline/cell_headless_generate_prompts.gd"
+      - "tools/pipeline/cell_creature_json_loader.gd"
+  workflow_dispatch: {}
+
+jobs:
+  generate-prompts:
+    runs-on: ubuntu-latest
+
+    env:
+      GODOT_VERSION: "4.3"       # adjust to your version
+      GODOT_HEADLESS_URL: "https://downloads.tuxfamily.org/godotengine/4.3/Godot_v4.3-stable_linux.x86_64.zip"
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Cache Godot binary
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: godot-bin
+          key: godot-${{ env.GODOT_VERSION }}
+
+      - name: Download Godot headless (if needed)
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p godot-bin
+          curl -L "$GODOT_HEADLESS_URL" -o godot.zip
+          unzip godot.zip -d godot-bin
+          chmod +x godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64
+
+      - name: List project
+        run: ls -R
+
+      - name: Run CELL headless prompt generator
+        run: |
+          ./godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64 \
+            --headless \
+            --path . \
+            --script res://tools/pipeline/cell_headless_generate_prompts.gd
+
+      - name: Upload generated prompt artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cell-creature-prompts
+          path: |
+            assets/creatures/**/creature_2d_prompt.txt
+            assets/creatures/**/creature_3d_prompt.txt
+            assets/creatures/**/creature_lore_prompt.txt
+            assets/creatures/**/creature_prompts.json
+          if-no-files-found: warn

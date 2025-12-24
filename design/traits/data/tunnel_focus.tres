@@ -1,0 +1,14 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "tunnel_focus"
+display_name = "Tunnel Focus"
+description = "You own the corridor. Frontal math is your friend."
+
+instinct_delta = 1.0
+
+status_rules = { "MAINT_TUNNEL": { "frontal_cone_hit_bonus": 0.10, "flank_penalty": -0.15 } }
+
+respect_deltas = { "SECTION_COMMAND": 5 }

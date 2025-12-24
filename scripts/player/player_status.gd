@@ -34,7 +34,7 @@ const PANIC_SANITY_THRESHOLD := 0.35
 const BLEEDOUT_HEALTH_THRESHOLD := 0.25
 
 # Cached display state for HUD (normalized 0.0–1.0)
-var hud_state := {
+var hud_state: Dictionary = {
     "health": 1.0,
     "oxygen": 1.0,
     "stamina": 1.0,
@@ -97,6 +97,9 @@ func _ready() -> void:
         "suit_snapshot": suit.get_debug_snapshot()
     })
 
+    # Wire radio -> HUD relay
+    _wire_radio_hallucinations()
+
 func _physics_process(delta: float) -> void:
     if not is_alive:
         return
@@ -121,7 +124,7 @@ func _physics_process(delta: float) -> void:
 
     # Apply ambient heat from FireNodes / CampfireRemains
     if ambient_heat_delta_c_per_sec != 0.0:
-        vitality_system.bodytemperature = clampf(
+        vitality_system.bodytemperature = clamp(
             vitality_system.bodytemperature + ambient_heat_delta_c_per_sec * delta,
             vitality_system.bodytemperature_min,
             vitality_system.bodytemperature_max
@@ -179,6 +182,9 @@ func _physics_process(delta: float) -> void:
     _emit_hud_update()
 
     DebugLog.log("PlayerStatus", "TICK", last_tick_telemetry)
+
+    # Drive radio hallucination/signal system (if loaded as autoload)
+    _update_radio_hallucinations()
 
 # -------------------------------------------------------------------
 # STATE / HUD SYNC
@@ -257,6 +263,38 @@ func _sync_hud_from_systems() -> void:
     hud_state["is_freezing"] = is_freezing
     hud_state["is_suffocating"] = is_suffocating
     hud_state["is_panicking"] = is_panicking
+
+func _wire_radio_hallucinations() -> void:
+    # Connect RadioTransmissions.hallucination_pulse -> _on_radio_hallucination_pulse.
+    if typeof(RadioTransmissions) == TYPE_NIL:
+        return
+    var radio := RadioTransmissions
+    if radio.has_signal("hallucination_pulse") and not radio.is_connected("hallucination_pulse", self, "_on_radio_hallucination_pulse"):
+        radio.connect("hallucination_pulse", Callable(self, "_on_radio_hallucination_pulse"))
+
+func _on_radio_hallucination_pulse(oxygen_seconds: float) -> void:
+    # Relay the pulse to HUD nodes that opt-in by being in group 'hud_neurochip'.
+    var hud_nodes := get_tree().get_nodes_in_group("hud_neurochip")
+    for node in hud_nodes:
+        if node and node.has_method("on_radio_hallucination_pulse"):
+            node.on_radio_hallucination_pulse(oxygen_seconds)
+
+func get_oxygen_seconds_remaining() -> float:
+    if pools and pools.has_method("get_oxygen_seconds_remaining"):
+        return pools.get_oxygen_seconds_remaining()
+    return 999.0
+
+func _update_radio_hallucinations() -> void:
+    # Push current oxygen state into RadioTransmissions autoload (if available)
+    if not pools or not pools.has_method("get_oxygen_seconds_remaining"):
+        return
+
+    var oxygen_seconds := pools.get_oxygen_seconds_remaining()
+    var alive := is_alive
+
+    # Safe-call the autoload singleton if it exists in the running project
+    if typeof(RadioTransmissions) != TYPE_NIL:
+        RadioTransmissions.set_oxygen_state(oxygen_seconds, is_suffocating, alive)
 
 func _emit_hud_update() -> void:
     get_tree().call_group_flags(

@@ -1,0 +1,10 @@
+{
+  "id": "obitel_9_field_note_07",
+  "title": "Obitel-9: Field Note 07",
+  "speaker": "researcher",
+  "category": "artifact",
+  "text": "The Veles signal repeats like a heart. Files show chant harmonics embedded in noise. Test subject #14 slept with the implants active for 36 hours—woke fluent in old prayers, but spoke in machine tags.",
+  "vo_hint": "breathy, uncertain — 'We heard it again. It's learning our names.'",
+  "audio_clip": "res://audio/logs/obitel_9_field_note_07.ogg",
+  "tags": ["veles", "implant", "dream", "chant"]
+}

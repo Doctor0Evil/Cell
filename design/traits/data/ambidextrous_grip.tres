@@ -1,0 +1,14 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "ambidextrous_grip"
+display_name = "Ambidextrous Grip"
+description = "Two hands, one mind. Reloads and off-hand usage feel natural."
+
+dexterity_delta = 2.0
+status_rules = { "GLOBAL": { "offhand_penalty_mult": 0.5, "dual_wield_recoil_mult": 0.9 } }
+
+narrative_tags = ["GUN_HANDLING"]
+respect_deltas = { "SECURITY_ARMS": 5 }

@@ -1,0 +1,52 @@
+[gd_scene load_steps=3 format=3]
+
+[node name="HadesThetaBlockA" type="Node3D"]
+
+[node name="MoonhowlVentController" type="Node3D" parent="."]
+script = ExtResource( 1 )
+place_id = "PLCORBITALHADES01"
+scene_id = "SCN-HADES-VENT-TABOO-02"
+taboo_ids = ["TABSVENTSILENCE01"]
+
+[node name="Player" type="CharacterBody3D" parent="."]
+script = ExtResource( 3 )
+groups = ["PlayerStatus"]
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+
+[node name="PlayerVoiceVentSensor" type="Node3D" parent="Player"]
+script = ExtResource( 2 )
+vent_group = "vent_grille"
+listen_radius = 14.0
+loudness_threshold = 0.25
+
+[node name="Vent_Grille_A01" type="StaticBody3D" parent="."]
+groups = ["vent_grille"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4 )
+
+[node name="Label3D" type="Label3D" parent="Vent_Grille_A01"]
+text = "VENT_A01"
+
+[node name="VentTabooManualTester" type="Node" parent="."]
+script = ExtResource( 4 )
+player_sensor_path = NodePath("Player/PlayerVoiceVentSensor")
+vent_node_path = NodePath("Vent_Grille_A01")
+test_loudness = 0.85
+
+[node name="UI_Debug" type="CanvasLayer" parent="."]
+
+[node name="Control" type="Control" parent="UI_Debug"]
+anchor_left = 0.02
+anchor_top = 0.02
+anchor_right = 0.3
+anchor_bottom = 0.1
+
+[node name="VentTabooTestButton" type="Button" parent="UI_Debug/Control"]
+script = ExtResource( 5 )
+tester_path = NodePath("VentTabooManualTester")
+
+[ext_resource path="res://scripts/world/hades_theta/moonhowl_vent_controller.gd" type="Script" id=1]
+[ext_resource path="res://scripts/world/player_voice_vent_sensor.gd" type="Script" id=2]
+[ext_resource path="res://scripts/player/player_dummy_controller.gd" type="Script" id=3]
+[ext_resource path="res://scripts/debug/vent_taboo_manual_tester.gd" type="Script" id=4]
+[ext_resource path="res://scripts/debug/vent_taboo_test_button.gd" type="Script" id=5]

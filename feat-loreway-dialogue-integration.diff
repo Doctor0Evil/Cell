@@ -1,0 +1,1459 @@
+*** Begin Patch
+*** Add File: res/narrative/_schema/dialogue_schema.json
++{
++  "$schema": "http://json-schema.org/draft-07/schema#",
++  "title": "Loreway Dialogue Schema",
++  "type": "object",
++  "required": ["id", "title", "nodes"],
++  "properties": {
++    "id": { "type": "string" },
++    "title": { "type": "string" },
++    "meta": {
++      "type": "object",
++      "properties": {
++        "region_tags": { "type": "array", "items": { "type": "string" } },
++        "factions": { "type": "array", "items": { "type": "string" } },
++        "narrative_tags": { "type": "array", "items": { "type": "string" } },
++        "priority": { "type": "number" },
++        "version": { "type": "integer" },
++        "author": { "type": "string" }
++      },
++      "additionalProperties": true
++    },
++    "nodes": {
++      "type": "array",
++      "items": {
++        "type": "object",
++        "required": ["id", "type"],
++        "properties": {
++          "id": { "type": "string" },
++          "type": { "type": "string", "enum": ["line", "choice", "end"] },
++          "speaker": { "type": "string" },
++          "text": { "type": "string" },
++          "next": { "type": "string" },
++          "narrative_tags": { "type": "array", "items": { "type": "string" } },
++          "choices": {
++            "type": "array",
++            "items": {
++              "type": "object",
++              "required": ["id", "text"],
++              "properties": {
++                "id": { "type": "string" },
++                "text": { "type": "string" },
++                "label": { "type": "string" },
++                "action_type": { "type": "string" },
++                "action_payload": { "type": "object" },
++                "conditions": { "type": "array", "items": { "type": "object" } },
++                "checks": { "type": "array", "items": { "type": "object" } },
++                "effects": { "type": "array", "items": { "type": "object" } },
++                "effects_success": { "type": "array", "items": { "type": "object" } },
++                "effects_fail": { "type": "array", "items": { "type": "object" } },
++                "on_success_next": { "type": "string" },
++                "on_fail_next": { "type": "string" },
++                "next": { "type": "string" }
++              },
++              "additionalProperties": true
++            }
++          }
++        },
++        "additionalProperties": true
++      }
++    }
++  },
++  "additionalProperties": true
++}
++
+*** End Patch
+*** Begin Patch
+*** Add File: res/narrative/loreway/dialogue/ashveil_scavenger_intro.json
++{
++  "id": "ashveil_scavenger_intro",
++  "title": "Ashveil Scavenger – First Contact",
++  "meta": {
++    "region_tags": ["ASHVEILDRIFT"],
++    "factions": ["SCAVENGERRINGS"],
++    "narrative_tags": ["SCRAPROUTE", "FIRST_CONTACT"],
++    "priority": 10
++  },
++  "nodes": [
++    {
++      "id": "start",
++      "type": "line",
++      "speaker": "npc",
++      "text": "The dust eats metal and lungs out here. You still breathing, stranger?",
++      "next": "player_root"
++    },
++    {
++      "id": "player_root",
++      "type": "choice",
++      "choices": [
++        {
++          "id": "ask_for_help",
++          "text": "[Influence/Containment Face] \"Need routes that do not end in solvent rain.\"",
++          "conditions": [
++            { "type": "has_trait", "value": "containmentface" },
++            { "type": "faction_standing_min", "faction": "SCAVENGERRINGS", "standing": -10 }
++          ],
++          "effects": [
++            { "type": "respect_delta", "faction": "SCAVENGERRINGS", "value": 5 },
++            { "type": "flag_set", "flag": "ashveil_scavenger_routes_unlocked", "value": true }
++          ],
++          "next": "npc_respectful"
++        },
++        {
++          "id": "joke",
++          "text": "\"If the station wanted me dead, it would send something prettier.\"",
++          "conditions": [],
++          "effects": [
++            { "type": "disposition_delta", "faction": "SCAVENGERRINGS", "value": 3 }
++          ],
++          "next": "npc_amused"
++        },
++        {
++          "id": "intimidate",
++          "text": "[Hard Edge] \"Point me at solvent, scrap, or bodies. I do not like wasting O₂.\"",
++          "conditions": [
++            { "type": "has_trait", "value": "hardedge" }
++          ],
++          "effects": [
++            { "type": "respect_delta", "faction": "SCAVENGERRINGS", "value": 2 },
++            { "type": "respect_delta", "faction": "FORMALSECURITY", "value": -3 }
++          ],
++          "next": "npc_wary"
++        }
++      ]
++    },
++    {
++      "id": "npc_respectful",
++      "type": "line",
++      "speaker": "npc",
++      "text": "Containment tone. Fine. I have a route. You carry it; I deny knowing you.",
++      "next": "end"
++    },
++    {
++      "id": "npc_amused",
++      "type": "line",
++      "speaker": "npc",
++      "text": "Hah. If you can still joke, you have not seen the lower decks yet.",
++      "next": "end"
++    },
++    {
++      "id": "npc_wary",
++      "type": "line",
++      "speaker": "npc",
++      "text": "Edge like that gets you filed under \"temporary asset\" out here.",
++      "next": "end"
++    },
++    {
++      "id": "end",
++      "type": "end"
++    }
++  ]
++}
++
+*** End Patch
+*** Begin Patch
+*** Add File: res/scripts/narrative/dialogue_graph.gd
++extends Resource
++class_name DialogueGraph
++
++const NODE_LINE := "line"
++const NODE_CHOICE := "choice"
++const NODE_END := "end"
++
++class DialogueNode:
++    var id: StringName
++    var type: StringName
++    var speaker: StringName
++    var text: String = ""
++    var next: StringName = &""
++    var choices: Array = []
++
++class DialogueChoice:
++    var id: StringName
++    var text: String
++    var label: String = ""
++    var action_type: StringName = "DIALOGUE_BRANCH"
++    var action_payload: Dictionary = {}
++    var conditions: Array = []
++    var checks: Array = []
++    var effects: Array = []
++    var effects_success: Array = []
++    var effects_fail: Array = []
++    var next: StringName = &""
++    var on_success_next: StringName = &""
++    var on_fail_next: StringName = &""
++
++var id: StringName
++var title: String
++var meta := {}
++var nodes: Dictionary = {}
++
++static func from_dict(data: Dictionary) -> DialogueGraph:
++    var g := DialogueGraph.new()
++    g.id = StringName(data.get("id", ""))
++    g.title = data.get("title", "")
++    g.meta = data.get("meta", {})
++    for n_dict in data.get("nodes", []):
++        var n := DialogueNode.new()
++        n.id = StringName(n_dict.get("id", ""))
++        n.type = StringName(n_dict.get("type", "line"))
++        n.speaker = StringName(n_dict.get("speaker", ""))
++        n.text = n_dict.get("text", "")
++        n.next = StringName(n_dict.get("next", ""))
++        if n.type == NODE_CHOICE:
++            n.choices = []
++            for c_dict in n_dict.get("choices", []):
++                var c := DialogueChoice.new()
++                c.id = StringName(c_dict.get("id", ""))
++                c.text = c_dict.get("text", "")
++                c.label = c_dict.get("label", "")
++                c.action_type = StringName(c_dict.get("action_type", "DIALOGUE_BRANCH"))
++                c.action_payload = c_dict.get("action_payload", {})
++                c.conditions = c_dict.get("conditions", [])
++                c.checks = c_dict.get("checks", [])
++                c.effects = c_dict.get("effects", [])
++                c.effects_success = c_dict.get("effects_success", [])
++                c.effects_fail = c_dict.get("effects_fail", [])
++                c.next = StringName(c_dict.get("next", ""))
++                c.on_success_next = StringName(c_dict.get("on_success_next", ""))
++                c.on_fail_next = StringName(c_dict.get("on_fail_next", ""))
++                n.choices.append(c)
++        g.nodes[n.id] = n
++    return g
++
++func get_node(node_id: StringName) -> DialogueNode:
++    return nodes.get(node_id, null)
++
+*** End Patch
+*** Begin Patch
+*** Add File: res/scripts/narrative/loreway_bridge.gd
++extends Node
++class_name LorewayBridge
++
++@export_dir var dialogue_dir := "res/narrative/loreway/dialogue"
++var _cache: Dictionary = {}
++
++func _ready() -> void:
++    _load_all_dialogues()
++
++func _load_all_dialogues() -> void:
++    _cache.clear()
++    var dir := DirAccess.open(dialogue_dir)
++    if dir == null:
++        push_warning("LorewayBridge: cannot open dir %s" % dialogue_dir)
++        return
++    dir.list_dir_begin()
++    var f := dir.get_next()
++    while f != "":
++        if not dir.current_is_dir() and f.ends_with(".json"):
++            var path := dialogue_dir.path_join(f)
++            var text := FileAccess.get_file_as_string(path)
++            if text == "":
++                f = dir.get_next()
++                continue
++            var parsed := JSON.parse_string(text)
++            var data := null
++            if typeof(parsed) == TYPE_DICTIONARY and parsed.has("result"):
++                data = parsed["result"]
++            elif typeof(parsed) == TYPE_DICTIONARY:
++                data = parsed
++            if data != null:
++                var graph := DialogueGraph.from_dict(data)
++                _cache[graph.id] = graph
++        f = dir.get_next()
++    dir.list_dir_end()
++
++func get_graph(id: StringName) -> DialogueGraph:
++    return _cache.get(id, null)
++
++func get_dialogues_for_tags(tags: Array[StringName], region_tags: Array[StringName], faction: StringName) -> Array[StringName]:
++    var result: Array[StringName] = []
++    for g_id in _cache.keys():
++        var g: DialogueGraph = _cache[g_id]
++        var meta := g.meta
++        var g_tags: Array = meta.get("narrative_tags", [])
++        var g_regions: Array = meta.get("region_tags", [])
++        var g_factions: Array = meta.get("factions", [])
++        if not g_factions.is_empty() and faction not in g_factions:
++            continue
++        var match_score := 0
++        for t in tags:
++            if t in g_tags:
++                match_score += 1
++        for rt in region_tags:
++            if rt in g_regions:
++                match_score += 1
++        if match_score > 0:
++            result.append(g.id)
++    return result
++
+*** End Patch
+*** Begin Patch
+*** Add File: res/scripts/narrative/dialogue_condition_evaluator.gd
++extends Node
++class_name DialogueConditionEvaluator
++
++@export var trait_registry: Node        # CellTraitsRegistry
++@export var respect_system: Node        # CellRespectSystem or FactionSystem
++@export var game_state: Node           # GameState autoload
++@export var player_vitality: Node      # PlayerVitalitySystem
++@export var faction_system: Node       # FactionSystem
++@export var fracture_system: Node      # FractureSystem
++
++# Optional runtime context: { "player": Node, "npc": Node, "traits_registry": Resource, "faction_system": Node, "respect_system": Node }
++var context: Dictionary = {}
++
++func set_context(ctx: Dictionary) -> void:
++    context = ctx.duplicate()
++
++func _has_trait(trait_id: StringName, subject: StringName = &"player") -> bool:
++    # subject may be "player", "npc", or an entity Node passed in context
++    if subject == StringName("player") and context.has("player"):
++        var p := context["player"]
++        if p and p.has_method("get_active_trait_ids"):
++            return trait_id in p.get_active_trait_ids()
++        if p and p.has_meta("traits"):
++            return trait_id in p.get_meta("traits")
++    if subject == StringName("npc") and context.has("npc"):
++        var n := context["npc"]
++        if n and n.has("trait_ids"):
++            return trait_id in n.trait_ids
++
++    # Fallback: check registry-level presence (not an entity presence check)
++    if trait_registry == null:
++        return false
++    if trait_registry.has_method("has_trait"):
++        return trait_registry.has_trait(trait_id)
++    if trait_registry.has_method("get_active_trait_ids"):
++        return trait_id in trait_registry.get_active_trait_ids()
++    return false
++
++func _faction_standing_min(faction: StringName, min_value: float, subject: StringName = &"player") -> bool:
++    # subject-aware reservation: check player vs npc
++    if subject == StringName("player"):
++        if faction_system and faction_system.has_method("get_standing"):
++            var standing := faction_system.get_standing(faction)
++            return standing >= min_value
++        if respect_system and respect_system.has_method("get_respect_for"):
++            var s := respect_system.get_respect_for(faction)
++            return s >= min_value
++    if subject == StringName("npc") and context.has("npc"):
++        var n := context["npc"]
++        if n and n.has("base_faction"):
++            if faction_system and faction_system.has_method("get_relation_between"):
++                # hypothetical method: get_relation_between(faction_a, faction_b)
++                var rel := faction_system.get_relation_between(n.base_faction, faction)
++                return rel >= min_value
++    # fallback
++    if faction_system and faction_system.has_method("get_standing"):
++        var s2 := faction_system.get_standing(faction)
++        return s2 >= min_value
++    return false
++
++func _flag_check(flag: StringName, expected: bool) -> bool:
++    return game_state and game_state.has_method("get_flag") and game_state.get_flag(flag) == expected
++
++func _missing_trait(trait_id: StringName, subject: StringName = &"player") -> bool:
++    return not _has_trait(trait_id, subject)
++
++func _respect_range(faction: StringName, min_value: float, max_value: float) -> bool:
++    # Check respect standing against a range
++    var val := 0.0
++    if faction_system and faction_system.has_method("get_standing"):
++        val = faction_system.get_standing(faction)
++    elif respect_system and respect_system.has_method("get_respect_for"):
++        val = respect_system.get_respect_for(faction)
++    return val >= min_value and val <= max_value
++
++func _faction_relation_at_least(faction: StringName, relation_label: StringName) -> bool:
++    # Map textual relation to numeric threshold
++    var thresholds := {"hostile": -100.0, "neutral": 0.0, "friendly": 50.0}
++    var t := thresholds.get(str(relation_label).to_lower(), 0.0)
++    return _faction_standing_min(faction, t)
++
++func evaluate_condition(cond: Dictionary) -> bool:
++    var ctype := StringName(cond.get("type", ""))
++    # optional subject: "player" or "npc"
++    var subject := StringName(cond.get("subject", "player"))
++    match ctype:
++        "has_trait":
++            return _has_trait(StringName(cond.get("value", "")), subject)
++        "missing_trait":
++            return _missing_trait(StringName(cond.get("value", "")), subject)
++        "faction_standing_min":
++            return _faction_standing_min(
++                StringName(cond.get("faction", "")),
++                float(cond.get("standing", 0.0)),
++                subject
++            )
++        "min_respect":
++            return _faction_standing_min(
++                StringName(cond.get("faction", "")),
++                float(cond.get("value", 0.0)),
++                subject
++            )
++        "max_respect":
++            return not _faction_standing_min(StringName(cond.get("faction", "")), float(cond.get("value", 0.0)) + 0.0001, subject)
++        "faction_relation_at_least":
++            return _faction_relation_at_least(StringName(cond.get("faction", "")), StringName(cond.get("relation", "neutral")))
++        "flag_check":
++            return _flag_check(
++                StringName(cond.get("flag", "")),
++                bool(cond.get("value", true))
++            )
++        "region_has_tag":
++            return _region_has_tag(StringName(cond.get("tag", "")))
++        "vitality_threshold":
++            return _vitality_threshold(
++                StringName(cond.get("pool", "")),
++                float(cond.get("min", 0.0))
++            )
++        _:
++            push_warning("Unknown dialogue condition type: %s" % ctype)
++            return false
++
++func filter_choices(raw_choices: Array, ctx: Dictionary = {}) -> Array:
++    # ctx may include local context that overrides evaluator.context for this check
++    var merged_ctx := context.duplicate() if context else {} 
++    for k in ctx.keys():
++        merged_ctx[k] = ctx[k]
++    var result: Array = []
++    for c in raw_choices:
++        var ok := true
++        for cond in c.conditions:
++            # temporarily set context for nested checks
++            var prev_ctx := context
++            context = merged_ctx
++            var cond_ok := evaluate_condition(cond)
++            context = prev_ctx
++            if not cond_ok:
++                ok = false
++                break
++        if ok:
++            result.append(c)
++    return result
++
++func _has_trait(trait_id: StringName) -> bool:
++    if trait_registry == null:
++        return false
++    if trait_registry.has_method("get_trait"):
++        return trait_registry.get_trait(trait_id) != null
++    # Fallback: registry that exposes get_active_trait_ids
++    if trait_registry.has_method("get_active_trait_ids"):
++        return trait_id in trait_registry.get_active_trait_ids()
++    return false
++
++func _faction_standing_min_old(faction: StringName, min_value: float) -> bool:
++    if not faction_system:
++        return false
++    if faction_system.has_method("get_standing"):
++        var standing := faction_system.get_standing(faction)
++        return standing >= min_value
++    # fallback: try cell respect system
++    if respect_system and respect_system.has_method("get_respect_for"):
++        var s := respect_system.get_respect_for(faction)
++        return s >= min_value
++    return false
++
++func _flag_check_old(flag: StringName, expected: bool) -> bool:
++    return game_state and game_state.has_method("get_flag") and game_state.get_flag(flag) == expected
++
++func _region_has_tag(tag: StringName) -> bool:
++    return game_state and game_state.has_method("current_region_has_tag") and game_state.current_region_has_tag(tag)
++
++func _vitality_threshold(pool: StringName, min_value: float) -> bool:
++    if not player_vitality:
++        return false
++    if player_vitality.has_method("get_pool_value"):
++        return player_vitality.get_pool_value(pool) >= min_value
++    return false
++
++func apply_effects(effects: Array) -> void:
++    for eff in effects:
++        var etype := StringName(eff.get("type", ""))
++        match etype:
++            "respect_delta":
++                if faction_system and faction_system.has_method("add_respect_delta"):
++                    faction_system.add_respect_delta(StringName(eff.get("faction", "")), float(eff.get("value", 0.0)))
++                elif respect_system and respect_system.has_method("adjust_respect"):
++                    respect_system.adjust_respect(StringName(eff.get("faction", "")), float(eff.get("value", 0.0)))
++            "disposition_delta":
++                if faction_system and faction_system.has_method("add_disposition_delta"):
++                    faction_system.add_disposition_delta(StringName(eff.get("faction", "")), float(eff.get("value", 0.0)))
++            "flag_set":
++                if game_state and game_state.has_method("set_flag"):
++                    game_state.set_flag(StringName(eff.get("flag", "")), bool(eff.get("value", true)))
++            "vitality_delta":
++                if player_vitality and player_vitality.has_method("apply_dialogue_delta"):
++                    player_vitality.apply_dialogue_delta(eff)
++            "fracture_gain":
++                if fracture_system and fracture_system.has_method("add_fracture"):
++                    fracture_system.add_fracture(StringName(eff.get("fracture_id", "")))
++            _:
++                push_warning("Unknown dialogue effect type: %s" % etype)
++
+*** End Patch
+*** Begin Patch
+*** Add File: res/scripts/narrative/dialogue_session.gd
++extends Node
++class_name DialogueSession
++
++signal line_shown(speaker: StringName, text: String)
++signal choices_shown(choices: Array)
++signal dialogue_ended(id: StringName)
++signal speech_check_resolved(choice_id: StringName, result: Dictionary)
++
++@export var condition_evaluator: DialogueConditionEvaluator
++@export var speech_evaluator: Node    # SpeechCheckEvaluator or compatible
++@export var debug_snapshot: Node      # DialogueDebugSnapshot (optional)
++
++var graph: DialogueGraph
++var current_node_id: StringName
++var dialogue_id: StringName
++var context: Dictionary = {}
++var last_check_result: Dictionary = {}
++
++func get_current_lines() -> Dictionary:
++    var node := graph.get_node(current_node_id) if graph else null
++    if node == null:
++        return {}
++    return {"type": node.type, "speaker": node.speaker, "text": node.text, "choices": node.choices}
++
++func is_finished() -> bool:
++    var node := graph.get_node(current_node_id) if graph else null
++    if node == null:
++        return true
++    return node.type == DialogueGraph.NODE_END
++
++func start(graph_res: DialogueGraph, entry_id: StringName = &"start", ctx: Dictionary = {}) -> void:
++    graph = graph_res
++    dialogue_id = graph.id
++    current_node_id = entry_id
++    # store context and push to evaluator if available
++    self.context = ctx.duplicate()
++    if condition_evaluator and condition_evaluator.has_method("set_context"):
++        condition_evaluator.set_context(self.context)
++    _advance()
++
++func _advance() -> void:
++    if not graph:
++        return
++    var node := graph.get_node(current_node_id)
++    if node == null:
++        emit_signal("dialogue_ended", dialogue_id)
++        return
++
++    match node.type:
++        DialogueGraph.NODE_LINE:
++            emit_signal("line_shown", node.speaker, node.text)
++            if node.next != StringName():
++                current_node_id = node.next
++                call_deferred("_advance")
++            else:
++                emit_signal("dialogue_ended", dialogue_id)
++        DialogueGraph.NODE_CHOICE:
++            var available := condition_evaluator.filter_choices(node.choices)
++            emit_signal("choices_shown", available)
++        DialogueGraph.NODE_END:
++            emit_signal("dialogue_ended", dialogue_id)
++
++func choose(choice_id: StringName) -> void:
++    var node := graph.get_node(current_node_id)
++    if node == null or node.type != DialogueGraph.NODE_CHOICE:
++        return
++    for c in node.choices:
++        if c.id == choice_id:
++            # Run speech checks if present
++            var check_result := {}
++            if c.checks and c.checks.size() > 0 and speech_evaluator:
++                # We only handle the first check for now
++                var check_spec := c.checks[0]
++                if speech_evaluator.has_method("set_context"):
++                    speech_evaluator.set_context(context)
++                var raw := speech_evaluator.roll_speech_check(check_spec)
++                # Normalize to a common shape
++                check_result = {
++                    "passed": bool(raw.get("success", raw.get("success", raw.get("passed", false)))),
++                    "roll": int(raw.get("roll", 0)),
++                    "target": int(raw.get("difficulty", 0)),
++                    "stat_value": float(raw.get("base", 0.0)),
++                    "raw": raw
++                }
++                last_check_result = check_result
++                emit_signal("speech_check_resolved", c.id, check_result)
++                # Build snapshot extras
++                var extras := {
++                    "speech_check_result": check_result,
++                    "chosen_choice": c.id,
++                    "evaluated_traits": false,
++                    "evaluated_factions": false,
++                    "evaluated_vitality": false
++                }
++                # Inspect conditions to set evaluated flags
++                for cond in c.conditions:
++                    var t := str(cond.get("type", "")).to_lower()
++                    if t.find("trait") != -1:
++                        extras["evaluated_traits"] = true
++                    if t.find("faction") != -1 or t.find("respect") != -1:
++                        extras["evaluated_factions"] = true
++                    if t.find("vitality") != -1 or t.find("stat") != -1:
++                        extras["evaluated_vitality"] = true
++                # Decide routing based on check success
++                var success := check_result.get("passed", false)
++                var next_id := c.next
++                var effects := c.effects
++                if success:
++                    if c.on_success_next != StringName():
++                        next_id = c.on_success_next
++                    if c.effects_success and c.effects_success.size() > 0:
++                        effects = c.effects_success
++                else:
++                    if c.on_fail_next != StringName():
++                        next_id = c.on_fail_next
++                    if c.effects_fail and c.effects_fail.size() > 0:
++                        effects = c.effects_fail
++                condition_evaluator.apply_effects(effects)
++                current_node_id = next_id
++                # Capture snapshot if available
++                if debug_snapshot and debug_snapshot.has_method("capture"):
++                    debug_snapshot.capture(self, condition_evaluator, extras)
++                _advance()
++                return
++            # No check: apply standard effects and continue
++            condition_evaluator.apply_effects(c.effects)
++            current_node_id = c.next
++            if debug_snapshot and debug_snapshot.has_method("capture"):
++                debug_snapshot.capture(self, condition_evaluator, {"chosen_choice": c.id})
++            _advance()
++            return
++
+*** End Patch
+*** Begin Patch
+*** Add File: res/scripts/narrative/speech_check_evaluator.gd
++extends Node
++class_name SpeechCheckEvaluator
++
++@export var vitality: Node      # PlayerVitalitySystem
++@export var trait_system: Node  # CellTraitsRegistry
++@export var fracture_system: Node
++@export var buff_system: Node
++
++var rng := RandomNumberGenerator.new()
++var context: Dictionary = {}
++
++func set_context(ctx: Dictionary) -> void:
++    context = ctx.duplicate()
++
++func _ready() -> void:
++    rng.randomize()
++
++func roll_speech_check(check: Dictionary) -> Dictionary:
++    # Support two check styles:
++    # - speech_skill style (subtype/attribute/difficulty)
++    # - stat style: {"type":"stat","stat":"vitality","difficulty":12}
++    if str(check.get("type", "")).to_lower() == "stat":
++        var stat := StringName(check.get("stat", "vitality"))
++        var difficulty := int(check.get("difficulty", 10))
++        var base := _get_stat_value(stat)
++        var roll := rng.randi_range(1, 20)
++        var total := base + roll
++        var success := total >= difficulty
++        return {
++            "type": "stat",
++            "stat": stat,
++            "difficulty": difficulty,
++            "base": base,
++            "roll": roll,
++            "total": total,
++            "success": success
++        }
++
++    var subtype := StringName(check.get("subtype", ""))
++    var attribute := StringName(check.get("attribute", "Influence"))
++    var difficulty := int(check.get("difficulty", 10))
++    var allowed_mods: Array = check.get("mods", ["trait", "consumable", "fracture"])
++
++    var base := _get_base_attribute(attribute)
++    var mod := 0.0
++
++    if "trait" in allowed_mods:
++        mod += _get_trait_mod(subtype)
++    if "fracture" in allowed_mods:
++        mod += _get_fracture_mod(subtype)
++    if "consumable" in allowed_mods:
++        mod += _get_buff_mod(subtype)
++
++    var roll := rng.randi_range(1, 20)
++    var total := base + mod + roll
++    var success := total >= difficulty
++
++    return {
++        "subtype": subtype,
++        "attribute": attribute,
++        "difficulty": difficulty,
++        "base": base,
++        "mod": mod,
++        "roll": roll,
++        "total": total,
++        "success": success
++    }
++
++func _get_base_attribute(attr: StringName) -> float:
++    # Try player context first
++    if context.has("player"):
++        var p := context["player"]
++        if p and p.has_method("get_attribute"):
++            return float(p.get_attribute(str(attr)))
++    # fallback to vitality system
++    if vitality == null:
++        return 0.0
++    if vitality.has_method("influence") and str(attr).to_lower() == "influence":
++        return vitality.influence
++    if vitality.has_method("get_attribute"):
++        return float(vitality.get_attribute(str(attr)))
++    return 0.0
++
++func _get_stat_value(stat: StringName) -> float:
++    if context.has("player"):
++        var p := context["player"]
++        if p and p.has_method("get_attribute"):
++            return float(p.get_attribute(str(stat)))
++    return 0.0
++
++func _get_trait_mod(subtype: StringName) -> float:
++    if trait_system == null:
++        return 0.0
++    var sum := 0.0
++    if trait_system.has_method("get_active_traits"):
++        for t in trait_system.get_active_traits():
++            if t is Dictionary and t.has("narrativetags"):
++                if subtype in t["narrativetags"]:
++                    sum += 2.0
++    return sum
++
++func _get_fracture_mod(subtype: StringName) -> float:
++    if fracture_system == null:
++        return 0.0
++    var sum := 0.0
++    if fracture_system.has_method("get_active_fractures"):
++        for f in fracture_system.get_active_fractures():
++            if f is Dictionary and f.has("tags"):
++                if subtype in f["tags"]:
++                    sum += 1.0
++    return sum
++
++func _get_buff_mod(subtype: StringName) -> float:
++    if buff_system == null:
++        return 0.0
++    var sum := 0.0
++    if buff_system.has_method("get_active_buffs"):
++        for b in buff_system.get_active_buffs():
++            if not b.has("tags"):
++                continue
++            var tags: Array = b["tags"]
++            if "SPEECH_BOOST" in tags:
++                sum += float(b.get("speech_bonus", 0.0))
++            if "CHEM_NERVE" in tags and subtype == "INTIMIDATION":
++                sum += float(b.get("intimidation_bonus", 0.0))
++            if "CHEM_EMPATH" in tags and subtype == "EMPATHY":
++                sum += float(b.get("empathy_bonus", 0.0))
++    return sum
++
+*** End Patch
+*** Begin Patch
+*** Add File: res/scripts/narrative/interaction_router.gd
++extends Node
++class_name InteractionRouter
++
++@export var combat_system: Node
++@export var barter_system: Node
++@export var inventory_system: Node
++@export var party_menu: Node
++@export var journal_system: Node
++@export var dialogue_session: Node
++
++signal interaction_completed(should_resume_dialogue: bool, next_node: StringName)
++
++func handle_choice(choice: Object, node_id: StringName) -> void:
++    var action_type := String(choice.get("action_type", "DIALOGUE_BRANCH"))
++    var payload := choice.get("action_payload", {})
++
++    match action_type:
++        "DIALOGUE_BRANCH":
++            _route_dialogue_branch(choice)
++        "OPEN_BARTER":
++            _open_barter(payload)
++        "SHOW_ITEM_MENU":
++            _open_show_item_menu(payload)
++        "OFFER_CONSUMABLE":
++            _open_offer_consumable_menu(payload)
++        "OPEN_PARTY_MENU":
++            _open_party_menu(payload)
++        "START_COMBAT":
++            _start_combat(payload)
++        _:
++            _route_dialogue_branch(choice)
++
++func _route_dialogue_branch(choice: Object) -> void:
++    if dialogue_session and dialogue_session.has_method("choose"):
++        dialogue_session.choose(StringName(choice.get("id", "")))
++
++func _open_barter(payload: Dictionary) -> void:
++    if barter_system and barter_system.has_method("open_barter"):
++        barter_system.open_barter(payload.get("shop_id", ""))
++    emit_signal("interaction_completed", true, dialogue_session.current_node_id)
++
++func _open_show_item_menu(payload: Dictionary) -> void:
++    if inventory_system and inventory_system.has_method("open_show_item_menu"):
++        inventory_system.open_show_item_menu(payload)
++    emit_signal("interaction_completed", true, dialogue_session.current_node_id)
++
++func _open_offer_consumable_menu(payload: Dictionary) -> void:
++    if inventory_system and inventory_system.has_method("open_offer_consumable_menu"):
++        inventory_system.open_offer_consumable_menu(payload)
++    emit_signal("interaction_completed", true, dialogue_session.current_node_id)
++
++func _open_party_menu(_payload: Dictionary) -> void:
++    if party_menu and party_menu.has_method("open_party_menu"):
++        party_menu.open_party_menu()
++    emit_signal("interaction_completed", true, dialogue_session.current_node_id)
++
++func _start_combat(payload: Dictionary) -> void:
++    if combat_system and combat_system.has_method("start_scripted_encounter"):
++        combat_system.start_scripted_encounter(payload.get("encounter_id", ""))
++    emit_signal("interaction_completed", false, StringName())
++
+*** End Patch
+*** Begin Patch
+*** Add File: res/scripts/narrative/encounter_manager.gd
++extends Node
++class_name EncounterManager
++
++@export var npc_personality_db: Array = []
++@export var dialogue_loader: Node
++@export var region_manager: Node
++@export var rng: RandomNumberGenerator
++
++func _ready() -> void:
++    if rng == null:
++        rng = RandomNumberGenerator.new()
++        rng.randomize()
++
++func try_spawn_dialogue_encounter(player: Node) -> void:
++    var region_tags: Array[StringName] = region_manager.get_current_region_tags()
++    var oxygen_low := player.get("oxygen_ratio") < 0.35
++    var sanity_low := player.get("sanity_ratio") < 0.5
++
++    var context := {
++        "region_tags": region_tags,
++        "oxygen_low": oxygen_low,
++        "sanity_low": sanity_low,
++        "is_first_meeting": true
++    }
++
++    var pool: Array = []
++    for p in npc_personality_db:
++        for t in p.encounter_tags:
++            if t in region_tags:
++                pool.append(p)
++                break
++
++    if pool.is_empty():
++        return
++
++    var picked := _weighted_pick(pool, context)
++    _spawn_npc_and_start_dialogue(picked, context)
++
++func _weighted_pick(pool: Array, context: Dictionary) -> Object:
++    var weights: Array[float] = []
++    var total := 0.0
++    for p in pool:
++        var w := 1.0
++        if "ASHVEILDRIFT" in context["region_tags"] and "SCRAPROUTE" in p.narrative_tags:
++            w += 2.0
++        if context["oxygen_low"]:
++            w += p.empathy * 0.5 + p.greed * 0.5
++        if context["sanity_low"]:
++            w += p.paranoia if p.has("paranoia") else 0.0
++        weights.append(w)
++        total += w
++
++    var roll := rng.randf_range(0.0, total)
++    var acc := 0.0
++    for i in pool.size():
++        acc += weights[i]
++        if roll <= acc:
++            return pool[i]
++    return pool[pool.size() - 1]
++
++func _spawn_npc_and_start_dialogue(personality: Object, context: Dictionary) -> void:
++    var npc_scene: PackedScene = preload("res/scenes/npc/humanoid_npc.tscn")
++    var npc := npc_scene.instantiate()
++    get_tree().current_scene.add_child(npc)
++    npc.global_position = region_manager.get_encounter_spawn_point()
++
++    var controller := npc.get_node("DialogueController") if npc.has_node("DialogueController") else null
++    if controller:
++        controller.personality = personality
++        controller.dialogue_loader = dialogue_loader
++        controller.start_best_dialogue(context)
++
+*** End Patch
+*** Begin Patch
+*** Add File: res/scripts/debug/dialogue_debug_snapshot.gd
++extends Node
++class_name DialogueDebugSnapshot
++
++var last_snapshot := {}
++
++func capture(session: DialogueSession, evaluator: DialogueConditionEvaluator, extra: Dictionary = {}) -> void:
++    var node_id := session.current_node_id
++    var graph := session.graph
++    var node := graph.get_node(node_id) if graph else null
++
++    var snapshot := {
++        "dialogue_id": graph.id if graph else "",
++        "node_id": node_id,
++        "node_type": node.type if node else "",
++        "speaker": node.speaker if node else "",
++        "text": node.text if node else "",
++        "timestamp": Time.get_datetime_string_from_unix_time(Time.get_unix_time_from_system()),
++        "player_traits": evaluator.trait_registry.get_active_trait_ids() if evaluator.trait_registry and evaluator.trait_registry.has_method("get_active_trait_ids") else [],
++        "region_tags": evaluator.game_state.current_region_tags if evaluator.game_state and evaluator.game_state.has_method("current_region_tags") else [],
++        "faction_standings": evaluator.faction_system.dump_standings() if evaluator.faction_system and evaluator.faction_system.has_method("dump_standings") else {},
++        "extra": extra
++    }
++
++    last_snapshot = snapshot
++    _print_snapshot(snapshot)
++
++func _print_snapshot(s: Dictionary) -> void:
++    print("--- CellDialogueDebugSnapshot ---")
++    print("Dialogue:", s["dialogue_id"], "Node:", s["node_id"], "Type:", s["node_type"])
++    print("Speaker:", s["speaker"])
++    print("Text:", s["text"])
++    print("RegionTags:", s["region_tags"])
++    print("PlayerTraits:", s["player_traits"])
++    print("FactionStandings:", s["faction_standings"])
++    print("Extra:", s["extra"])
++    print("--- EndSnapshot ---")
++
+*** End Patch
+*** Begin Patch
+*** Add File: tests/unit/test_dialogue_loading.gd
++# Simple unit test to validate dialogue loading
++# This script can be used by a test runner or executed manually in the editor.
++
++func run_test() -> void:
++    var bridge := preload("res://res/scripts/narrative/loreway_bridge.gd").new()
++    bridge._load_all_dialogues()
++    var g = bridge.get_graph("ashveil_scavenger_intro")
++    if g == null:
++        printerr("[test_dialogue_loading] FAILED: graph was not loaded")
++    else:
++        print("[test_dialogue_loading] OK: loaded graph", g.id)
++
+*** End Patch
+*** Begin Patch
+*** Add File: tests/scenes/DialogueTestScene.tscn
++[gd_scene load_steps=2 format=3]
++
++[node name="DialogueTestScene" type="Node"]
++script = ExtResource( 1 )
++
++[ext_resource path="res://res/scripts/narrative/dialogue_session.gd" type="Script" id=1]
++
++[node name="LorewayBridge" parent="." instance="true"]
++script = ExtResource( 2 )
++
++[ext_resource path="res://res/scripts/narrative/loreway_bridge.gd" type="Script" id=2]
++
++[node name="NPCDialogueTestController" parent="." instance="true"]
++script = ExtResource( 3 )
++
++[ext_resource path="res://tests/scene_scripts/npc_dialogue_test_controller.gd" type="Script" id=3]
++
+*** End Patch
+*** Begin Patch
+*** Add File: tests/scene_scripts/dialogue_test_runner.gd
++extends Node
++
++func _ready():
++    var bridge := get_node("LorewayBridge") if has_node("LorewayBridge") else null
++    if bridge == null:
++        bridge = preload("res://res/scripts/narrative/loreway_bridge.gd").new()
++        add_child(bridge)
++    bridge._load_all_dialogues()
++    var g := bridge.get_graph("ashveil_scavenger_intro")
++    if g:
++        print("[DialogueTestRunner] Graph loaded:", g.id)
++        var session := DialogueSession.new()
++        session.condition_evaluator = preload("res://res/scripts/narrative/dialogue_condition_evaluator.gd").new()
++        session.start(g)
++        # Listen for signals for quick smoke test
++        session.connect("line_shown", Callable(self, "_on_line_shown"))
++        session.connect("choices_shown", Callable(self, "_on_choices_shown"))
++    else:
++        printerr("[DialogueTestRunner] Failed to load graph")
++
++func _on_line_shown(speaker, text):
++    print("LINE:", speaker, text)
++
++func _on_choices_shown(choices):
++    print("CHOICES:")
++    for c in choices:
++        print(" - ", c.id, c.text)
++
+*** End Patch
+*** Begin Patch
+*** Add File: tests/scene_scripts/npc_dialogue_test_controller.gd
++extends Control
++
++@onready var line_label := Label.new()
++@onready var choices_vbox := VBoxContainer.new()
++
++func _ready():
++    # Build simple UI
++    add_child(line_label)
++    add_child(choices_vbox)
++    line_label.text = "(dialogue will appear here)"
++
++    # Load bridge and graph
++    var bridge := preload("res://res/scripts/narrative/loreway_bridge.gd").new()
++    add_child(bridge)
++    bridge._load_all_dialogues()
++    var g := bridge.get_graph("ashveil_scavenger_intro")
++    if not g:
++        printerr("[NPCDialogueTestController] failed to load graph")
++        return
++
++    # Setup fake player and npc
++    var player := Node.new()
++    player.set_meta("traits", ["containmentface", "chemdiscipline"])
++    player.get_active_trait_ids = func():
++        return player.get_meta("traits")
++    player.get_attribute = func(name):
++        match str(name).to_lower():
++            "influence": return 7.0
++            "temper": return 5.0
++            _ : return 0.0
++
++    var npc := preload("res://res/scripts/world/npc/npc_personality.gd").new()
++    npc.trait_ids = ["ashveilscavenger"]
++    npc.narrative_tags = ["SCRAPROUTE"]
++
++    # Create evaluator and session
++    var evaluator := preload("res://res/scripts/narrative/dialogue_condition_evaluator.gd").new()
++    evaluator.trait_registry = preload("res://design/traits/cell_traits_registry.gd").new()
++    evaluator.faction_system = get_node_or_null("/root/FactionSystem")
++
++    var session := preload("res://res/scripts/narrative/dialogue_session.gd").new()
++    session.condition_evaluator = evaluator
++
++    # Set context and start
++    var ctx := {"player": player, "npc": npc}
++    session.start(g, "start", ctx)
++
++    # Wire signals
++    session.connect("line_shown", Callable(self, "_on_line_shown"))
++    session.connect("choices_shown", Callable(self, "_on_choices_shown"))
++    session.connect("dialogue_ended", Callable(self, "_on_dialogue_ended"))
++
++func _on_line_shown(speaker, text):
++    line_label.text = str(speaker) + ": " + str(text)
++    print("LINE:", speaker, text)
++
++func _on_choices_shown(choices):
++    # clear vbox
++    for child in choices_vbox.get_children():
++        child.queue_free()
++    for c in choices:
++        var b := Button.new()
++        b.text = c.text if c.text != "" else c.label
++        b.pressed.connect(func(cid=c.id):
++            session.choose(StringName(cid))
++        )
++        choices_vbox.add_child(b)
++        print("CHOICE:", c.id, c.text)
++
++func _on_dialogue_ended(id):
++    print("Dialogue ended:", id)
++    line_label.text = "(ended)"
++
+*** End Patch
+*** Begin Patch
+*** Add File: tests/unit/test_dialogue_trait_hooks.gd
++# Unit-like smoke tests for DialogueConditionEvaluator
++
++func run_test() -> void:
++    var evaluator := preload("res://res/scripts/narrative/dialogue_condition_evaluator.gd").new()
++    evaluator.trait_registry = preload("res://design/traits/cell_traits_registry.gd").new()
++
++    # fake player
++    var player := Node.new()
++    player.set_meta("traits", ["containmentface"])
++    player.get_active_trait_ids = func():
++        return player.get_meta("traits")
++
++    # fake faction system stub
++    var faction := Node.new()
++    faction.get_standing = func(f):
++        if str(f) == "SCAVENGERRINGS":
++            return -5
++        return 0
++
++    # context
++    var ctx := {"player": player, "npc": null}
++    evaluator.set_context(ctx)
++    evaluator.faction_system = faction
++
++    # has_trait
++    var c1 := {"type": "has_trait", "value": "containmentface", "subject": "player"}
++    assert(evaluator.evaluate_condition(c1) == true)
++
++    # missing_trait
++    var c2 := {"type": "missing_trait", "value": "hardedge", "subject": "player"}
++    assert(evaluator.evaluate_condition(c2) == true)
++
++    # faction standing min (should fail because -5 < -3)
++    var c3 := {"type": "faction_standing_min", "faction": "SCAVENGERRINGS", "standing": -3}
++    assert(evaluator.evaluate_condition(c3) == false)
++
++    print("[test_dialogue_trait_hooks] OK")
++
+*** End Patch
+*** Begin Patch
+*** Add File: tests/unit/test_dialogue_speech_checks.gd
++# Test speech check flow through DialogueSession
++
++func run_test() -> void:
++    # Build a simple graph with a speech check
++    var graph_dict := {
++        "id": "test_speech",
++        "title": "Speech Test",
++        "nodes": [
++            {"id": "start", "type": "line", "speaker": "npc", "text": "Hello.", "next": "player_root"},
++            {"id": "player_root", "type": "choice", "choices": [
++                { "id": "calm_negotiation", "text": "[Containment Face] \"We both want this deck breathing tomorrow.\"", 
++                  "checks": [ { "type": "speech_skill", "subtype": "NEGOTIATION", "attribute": "Influence", "difficulty": 12 } ],
++                  "on_success_next": "npc_soften", "on_fail_next": "npc_suspicious",
++                  "effects_success": [{"type":"respect_delta","faction":"ADMINCORE","value":5}],
++                  "effects_fail": [{"type":"respect_delta","faction":"ADMINCORE","value":-3}]
++                }
++            ]},
++            {"id":"npc_soften","type":"line","speaker":"npc","text":"Fine.","next":"end"},
++            {"id":"npc_suspicious","type":"line","speaker":"npc","text":"I do not trust you.","next":"end"},
++            {"id":"end","type":"end"}
++        ]
++    }
++
++    var g := preload("res://res/scripts/narrative/dialogue_graph.gd").from_dict(graph_dict)
++
++    # Fake player with Influence 15 to pass
++    var player := Node.new()
++    player.get_attribute = func(name):
++        if str(name).to_lower() == "influence": return 15
++        return 0
++
++    # Setup evaluators and session
++    var evaluator := preload("res://res/scripts/narrative/dialogue_condition_evaluator.gd").new()
++    var speech := preload("res://res/scripts/narrative/speech_check_evaluator.gd").new()
++    speech.set_context({"player": player})
++
++    var session := preload("res://res/scripts/narrative/dialogue_session.gd").new()
++    session.condition_evaluator = evaluator
++    session.speech_evaluator = speech
++
++    # Connect signal spies
++    var saw_check := false
++    var last := {}
++    session.connect("speech_check_resolved", Callable(self, "_on_check_resolved"))
++
++    func _on_check_resolved(choice_id, result):
++        saw_check = true
++        last = result
++
++    # Start and choose
++    session.start(g, "start", {"player": player})
++    # Advance from line to choices is deferred, so force a small delay via call_deferred pattern
++    call_deferred(func(): session.choose(StringName("calm_negotiation")))
++
++    # Validate
++    if not saw_check:
++        printerr("[test_dialogue_speech_checks] FAILED: check not seen")
++    else:
++        print("[test_dialogue_speech_checks] OK: check fired, passed=", last.get("passed"))
++        assert(last.get("passed", false) == true)
++        assert(session.get_current_lines().type == "line")
++        assert(g.get_node(session.current_node_id).id == StringName("npc_soften"))
++
+*** End Patch
+*** Begin Patch
+*** Add File: tests/unit/test_dialogue_snapshot.gd
++# Test that debug snapshot captures speech check results
++
++func run_test() -> void:
++    # Reuse the speech graph from previous test
++    var graph_dict := {
++        "id": "test_snapshot",
++        "title": "Snapshot Test",
++        "nodes": [
++            {"id": "start", "type": "line", "speaker": "npc", "text": "Hi.", "next": "player_root"},
++            {"id": "player_root", "type": "choice", "choices": [
++                { "id": "intimidate", "text": "[Hard Edge] Say it.", "checks": [ { "type": "stat", "stat": "vitality", "difficulty": 5 } ], "on_success_next": "succeed", "on_fail_next": "fail" }
++            ]},
++            {"id":"succeed","type":"line","speaker":"npc","text":"Back down","next":"end"},
++            {"id":"fail","type":"line","speaker":"npc","text":"Call backup","next":"end"},
++            {"id":"end","type":"end"}
++        ]
++    }
++
++    var g := preload("res://res/scripts/narrative/dialogue_graph.gd").from_dict(graph_dict)
++    # Fake player with vitality stat
++    var player := Node.new()
++    player.get_attribute = func(name):
++        if str(name).to_lower() == "vitality": return 10
++        return 0
++
++    var evaluator := preload("res://res/scripts/narrative/dialogue_condition_evaluator.gd").new()
++    var speech := preload("res://res/scripts/narrative/speech_check_evaluator.gd").new()
++    speech.set_context({"player": player})
++
++    var snapshot := preload("res://res/scripts/debug/dialogue_debug_snapshot.gd").new()
++
++    var session := preload("res://res/scripts/narrative/dialogue_session.gd").new()
++    session.condition_evaluator = evaluator
++    session.speech_evaluator = speech
++    session.debug_snapshot = snapshot
++
++    session.start(g, "start", {"player": player})
++    call_deferred(func(): session.choose(StringName("intimidate")))
++
++    # Check snapshot
++    var s := snapshot.last_snapshot
++    if s.empty():
++        printerr("[test_dialogue_snapshot] FAILED: snapshot empty")
++    else:
++        assert(s.has("extra"))
++        var extra := s["extra"]
++        assert(extra.has("speech_check_result"))
++        print("[test_dialogue_snapshot] OK: snapshot contains speech_check_result", extra["speech_check_result"])
++
+*** End Patch
+*** Begin Patch
+*** Add File: tools/validate_dialogue_json.py
++#!/usr/bin/env python3
++"""Validate dialogue JSON files against the repo schema.
++
++Usage: tools/validate_dialogue_json.py --schema <schema.json> --dir <dialogue_dir> [--pattern "**/*.json"]
++Exits non-zero on validation failures.
++"""
++
++import argparse
++import glob
++import json
++import os
++import sys
++from jsonschema import Draft7Validator
++
++
++def validate_file(path, schema, validator):
++    with open(path, 'r', encoding='utf-8') as fh:
++        try:
++            data = json.load(fh)
++        except Exception as e:
++            return [("parse_error", str(e))]
++    errors = []
++    for err in validator.iter_errors(data):
++        errors.append((err.path, err.message))
++    return errors
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument('--schema', required=True)
++    ap.add_argument('--dir', required=True)
++    ap.add_argument('--pattern', default='**/*.json')
++    args = ap.parse_args()
++
++    if not os.path.exists(args.schema):
++        print(f"Schema file not found: {args.schema}")
++        sys.exit(2)
++    if not os.path.exists(args.dir):
++        print(f"Dialogue dir not found: {args.dir}")
++        sys.exit(2)
++
++    with open(args.schema, 'r', encoding='utf-8') as fh:
++        schema = json.load(fh)
++
++    validator = Draft7Validator(schema)
++
++    pattern = os.path.join(args.dir, args.pattern)
++    files = glob.glob(pattern, recursive=True)
++
++    if not files:
++        print("No dialogue JSON files found to validate.")
++        return 0
++
++    failed = 0
++    for f in sorted(files):
++        errs = validate_file(f, schema, validator)
++        if errs:
++            failed += 1
++            print(f"\nValidation errors in: {f}")
++            for p, msg in errs:
++                print(f" - {p}: {msg}")
++
++    if failed:
++        print(f"\nJSON validation failed for {failed} file(s).")
++        sys.exit(1)
++    else:
++        print("All dialogue JSON files validate against schema.")
++        return 0
++
++if __name__ == '__main__':
++    sys.exit(main())
++
+*** End Patch
+*** Begin Patch
+*** Add File: .github/workflows/dialogue-json-validate.yml
++name: Validate Dialogue JSON Schema
++
++on:
++  push:
++    branches: [ 'feat/loreway-dialogue-integration', 'main' ]
++  pull_request:
++    branches: [ 'main' ]
++
++jobs:
++  validate-json:
++    name: Dialogue JSON Schema Validation
++    runs-on: ubuntu-latest
++
++    steps:
++      - name: Checkout
++        uses: actions/checkout@v4
++
++      - name: Set up Python
++        uses: actions/setup-python@v4
++        with:
++          python-version: '3.11'
++
++      - name: Install deps
++        run: |
++          python -m pip install --upgrade pip
++          pip install jsonschema
++
++      - name: Run dialogue JSON validation
++        run: |
++          python tools/validate_dialogue_json.py \
++            --schema res/narrative/_schema/dialogue_schema.json \
++            --dir res/narrative/loreway/dialogue \
++            --pattern "**/*.json"
++
+*** End Patch
+*** Begin Patch
+*** Add File: PR_DESCRIPTION.md
++# feat(loreway): add Godot dialogue runtime and Loreway bridge
++
++Summary
++-------
++Adds a Godot-native dialogue runtime and a Loreway bridge so Loreway JSON exports can drive in-game NPC conversations. Provides: graph loader/schema, runtime (graph, evaluator, session), speech-checks, interaction routing, encounter manager, debug snapshotting, basic tests, and a CI job to validate dialogue JSON files.
++
++Implementation details
++----------------------
++- Dialogue schema: `res/narrative/_schema/dialogue_schema.json`
++- Example graph: `res/narrative/loreway/dialogue/ashveil_scavenger_intro.json`
++- Runtime: `res/scripts/narrative/` (DialogueGraph, LorewayBridge, DialogueConditionEvaluator, DialogueSession, SpeechCheckEvaluator, InteractionRouter, EncounterManager)
++- Debugging: `res/scripts/debug/dialogue_debug_snapshot.gd`
++- Tests: `tests/unit/*` and `tests/scenes/DialogueTestScene.tscn` and `tests/scene_scripts/npc_dialogue_test_controller.gd`
++- CI: `.github/workflows/dialogue-json-validate.yml` and `tools/validate_dialogue_json.py` (validates all dialogue JSON files against schema)
++
++How to test locally
++-------------------
++1. Open the project in Godot editor.
++2. Run the scene `res://tests/scenes/DialogueTestScene.tscn` to manually step through the Ashveil scavenger intro.
++3. Run unit smoke tests by executing the provided small test scripts in the Godot editor (or a test harness).
++4. From the repo root, run:
++   ```sh
++   python tools/validate_dialogue_json.py --schema res/narrative/_schema/dialogue_schema.json --dir res/narrative/loreway/dialogue
++   ```
++   This will validate all JSON files and fail if any do not conform to schema.
++
++Risks & limitations
++-------------------
++- The speech-check JSON shape supports both `speech_skill` and simple `stat` checks; shape normalization is done in the session. If you prefer a single canonical shape, we can tighten schema and evaluator in follow-ups.
++- The existing Lua Loreway generator is not modified; compatibility was preserved via schema and loader but deeper integration can be added later.
++- The CI job will run JSON validation only; further unit & integration tests (Godot test harness) are recommended before merging.
++
++Suggested commit sequence for small, reviewable commits
++------------------------------------------------------
++Refer to `PR_COMMIT_STEPS.md` for commands to create the commits locally.
++
+*** End Patch
+*** Begin Patch
+*** Add File: PR_COMMIT_STEPS.md
++# PR commit steps (suggested)
++
++Run these locally (git must be available on your machine). They produce the commit sequence recommended in the PR plan.
++
++# 1. Create feature branch
+git checkout -b feat/loreway-dialogue-integration
++
++# 2. Commit 1: schema + example + loader stub
+git add res/narrative/_schema/dialogue_schema.json res/narrative/loreway/dialogue/ashveil_scavenger_intro.json res/scripts/narrative/loreway_bridge.gd
+git commit -m "feat(loreway): add dialogue schema, example graph, and LorewayBridge loader"
++
++# 3. Commit 2: core runtime
+git add res/scripts/narrative/dialogue_graph.gd res/scripts/narrative/dialogue_condition_evaluator.gd res/scripts/narrative/dialogue_session.gd res/scripts/narrative/speech_check_evaluator.gd
+git commit -m "feat(loreway): add DialogueGraph, condition evaluator, session, and speech checks"
++
++# 4. Commit 3: interaction + debug
+git add res/scripts/narrative/interaction_router.gd res/scripts/narrative/encounter_manager.gd res/scripts/debug/dialogue_debug_snapshot.gd
+git commit -m "feat(loreway): add interaction router, encounter manager, and debug snapshot"
++
++# 5. Commit 4: tests and scene
+git add tests/scenes/DialogueTestScene.tscn tests/scene_scripts/npc_dialogue_test_controller.gd tests/unit/*.gd
+git commit -m "test(loreway): add dialogue test scene and unit tests"
++
++# 6. Commit 5: speech-check flow + snapshots
+# (assumes changes to DialogueSession and SpeechCheckEvaluator)
+git add res/scripts/narrative/dialogue_session.gd res/scripts/narrative/speech_check_evaluator.gd
+git commit -m "feat(loreway): integrate speech-check flow and snapshot reporting"
++
++# 7. Commit 6: CI JSON validation
+git add .github/workflows/dialogue-json-validate.yml tools/validate_dialogue_json.py PR_DESCRIPTION.md PR_COMMIT_STEPS.md
+git commit -m "ci(loreway): add JSON schema validation job for dialogue files"
++
++# 8. Push branch and open PR
+git push -u origin feat/loreway-dialogue-integration
++# Open a PR using your normal GitHub workflow UI or hub/gh CLI
++
+*** End Patch
+*** Begin Patch
+*** Add File: .github/PULL_REQUEST_TEMPLATE.md
++<!-- PR template for Loreway dialogue integration -->
++
++## Summary
++
++(One-line summary of the change)
++
++## Implementation
++
++- Bullet list of changes
++
++## How to test
++
++- Steps to run test scene and unit scripts
++- Run JSON validation: `python tools/validate_dialogue_json.py --schema res/narrative/_schema/dialogue_schema.json --dir res/narrative/loreway/dialogue`
++
++## Risks & Notes
++
++- Any known caveats
++
++## Changelog
++
++- Add entries as needed
++
+*** End Patch

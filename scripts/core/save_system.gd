@@ -14,7 +14,10 @@ static func has_any_profile() -> bool:
     return FileAccess.file_exists(SAVE_DIR + PROFILE_FILE)
 
 func new_profile() -> void:
+    # Generate a simple profile id and timestamp for metadata
+    var profile_id := "subject_%d" % [Time.get_unix_time_from_system()]
     current_profile = {
+        "id": profile_id,
         "created_at": Time.get_unix_time_from_system(),
         "last_region": "ASHVEIL_DEBRIS_STRATUM",
         "vitality": 5.0,
@@ -27,8 +30,24 @@ func new_profile() -> void:
         "yield": 5.0
     }
     _save_profile()
-    GameState.current_profile_id = &"default"
+    GameState.current_profile_id = StringName(profile_id)
     DebugLog.log("SaveSystem", "NEW_PROFILE", current_profile)
+
+func get_last_profile_meta() -> Dictionary:
+    # Returns lightweight metadata about the saved profile. Does not load full runtime state.
+    var meta: Dictionary = {}
+    if not has_any_profile():
+        return meta
+    var f := FileAccess.open(SAVE_DIR + PROFILE_FILE, FileAccess.READ)
+    if f == null:
+        return meta
+    var text := f.get_as_text()
+    var data := JSON.parse_string(text)
+    if typeof(data) == TYPE_DICTIONARY:
+        meta["id"] = data.get("id", "default")
+        meta["created_at"] = int(data.get("created_at", 0))
+        meta["last_region"] = data.get("last_region", "ASHVEIL_DEBRIS_STRATUM")
+    return meta
 
 func load_last_profile() -> void:
     if not has_any_profile():
@@ -43,11 +62,19 @@ func load_last_profile() -> void:
     if typeof(data) == TYPE_DICTIONARY:
         current_profile = data
         var region := StringName(current_profile.get("last_region", "ASHVEIL_DEBRIS_STRATUM"))
-        GameState.current_profile_id = &"default"
-        DebugLog.log("SaveSystem", "PROFILE_LOADED", {
-            "region": String(region)
-        })
-        GameState.load_region(region)
+        var gs := get_node_or_null("/root/GameState")
+        if gs:
+            gs.current_profile_id = &"default"
+            DebugLog.log("SaveSystem", "PROFILE_LOADED", {
+                "region": String(region)
+            })
+            gs.load_region(region)
+        else:
+            GameState.current_profile_id = &"default"
+            DebugLog.log("SaveSystem", "PROFILE_LOADED", {
+                "region": String(region)
+            })
+            GameState.load_region(region)
     else:
         DebugLog.log("SaveSystem", "LOAD_FAILED_PARSE", {})
 

@@ -1,0 +1,5 @@
+[gd_scene load_steps=1 format=3]
+
+[node name="SpineCrawler" type="Node3D"]
+
+# Placeholder enemy scene for Spine-Crawler (minimal node).

@@ -1,0 +1,63 @@
+{
+  "laws": [
+    {
+      "id": "LAW_CANNIBAL_TRIBUNAL",
+      "display_name": "Cannibal Tribunal",
+      "description": "Permits ritual cannibalism in return for protein distribution and order. Raises infection risk and cosmic suspicion.",
+      "category": "civic",
+      "enables_tags": ["cannibalism"],
+      "protein_consumption_mult": 0.9,
+      "infection_risk_mult": 1.5,
+      "on_crime_events": { "cannibalism": 0.8 },
+      "cosmic_trigger_chance": 0.05,
+      "cosmic_outcome_ids": ["plague_flesh_eater"]
+    },
+    {
+      "id": "LAW_PROPER_BURIAL",
+      "display_name": "Proper Burial",
+      "description": "Mandates respectful corpse handling and forbids organ harvesting; lowers infection risk but raises logistical burden.",
+      "category": "civic",
+      "forbids_tags": ["organ_harvest", "corpse_pit"],
+      "infection_risk_mult": 0.8,
+      "settlement_stability_delta": 0.02,
+      "on_disaster_events": { "corpse_overflow": 0.15 }
+    },
+    {
+      "id": "COSMIC_GOD_OF_CARRION",
+      "display_name": "God of Carrion",
+      "description": "A cosmic law watching over the carrion; carnivorous sins draw its attention.",
+      "category": "cosmic",
+      "cosmic_trigger_chance": 0.10,
+      "cosmic_outcome_ids": ["plague_flesh_eater"],
+      "on_crime_events": { "cannibalism": 1.0 }
+    },
+    {
+      "id": "COSMIC_COLD_VERGE",
+      "display_name": "Cold Verge",
+      "description": "A cosmic cold that punishes repeated neglect of oxygen and convoy abandonment. Can trigger lethal environmental events.",
+      "category": "cosmic",
+      "cosmic_trigger_chance": 0.08,
+      "cosmic_outcome_ids": ["cold_blizzard", "hull_breach_event"],
+      "on_disaster_events": { "oxygen_theft": 0.8, "abandoned_convoys": 0.6 }
+    }
+  ],
+
+  "cosmic_events": {
+    "plague_flesh_eater": {
+      "type": "plague",
+      "affects_tag": "cannibal",
+      "severity": 0.7,
+      "spread": 0.35
+    },
+    "cold_blizzard": {
+      "type": "meteor_strike",
+      "target": "exterior_hull",
+      "severity": 0.8
+    },
+    "hull_breach_event": {
+      "type": "oxygen_collapse",
+      "target": "random_convoy",
+      "severity": 0.9
+    }
+  }
+}

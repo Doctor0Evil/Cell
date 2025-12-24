@@ -1,0 +1,14 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "orbital_luck"
+display_name = "Orbital Luck"
+description = "Tiny improbable events read in your favor more often."
+
+luck_delta = 2.0
+
+status_rules = { "GLOBAL": { "rare_event_save_chance_mult": 1.5 } }
+
+respect_deltas = { "SUPERSTITION_CELLS": 5 }

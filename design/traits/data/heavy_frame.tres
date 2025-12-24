@@ -1,0 +1,20 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "heavy_frame"
+display_name = "Heavy Frame"
+description = "Built like a ballast. Carry more; dodge less."
+
+strength_delta = 2.0
+agility_delta = -1.0
+speed_delta = -0.5
+
+stamina_max_mult = 1.10
+oxygen_decay_mult = 1.05
+
+status_rules = { "GLOBAL": { "carry_capacity_bonus": 0.40 } }
+
+narrative_tags = ["HEAVY_WORKER", "BULK"]
+respect_deltas = { "BULK_LOGISTICS": 6 }

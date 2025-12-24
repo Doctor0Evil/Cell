@@ -1,0 +1,13 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "day_cycle_anchor"
+display_name = "Day Cycle Anchor"
+description = "Your rhythm matches the maintenance clock; you do better in daylight."
+
+logic_delta = 1.0
+tenacity_delta = 1.0
+
+status_rules = { "DAY_MODE": { "repair_speed_bonus": 0.10 } }

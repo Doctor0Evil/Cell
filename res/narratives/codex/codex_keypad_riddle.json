@@ -1,0 +1,8 @@
+{
+  "id": "codex_keypad_riddle_frozen_count",
+  "title": "Frozen Count",
+  "category": "codex_hint",
+  "text": "Sing the frozen count: 3 / pause / 2 / pause / 5 — the lock answers in tone.",
+  "keypad_sequence": [3, 2, 5],
+  "tags": ["keypad", "audio_puzzle", "tones"]
+}

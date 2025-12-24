@@ -72,9 +72,10 @@ func build_default_trees() -> void:
 	else:
 		cold_tree.skills = cold_pack.build_skills()
 	cold_tree.links = {
-		"THERMAL_REGULATOR": ["OXYGEN_CAPSULE_MASTERY"],
-		"OXYGEN_CAPSULE_MASTERY": ["VOID_ENDURANCE"]
+		"THERMAL_REGULATOR": ["LOX_BOTTLE_MASTERY"],
+		"LOX_BOTTLE_MASTERY": ["VOID_ENDURANCE"]
 	}
+	# Note: 'LOX_BOTTLE_MASTERY' replaces the older 'OXYGEN_CAPSULE_MASTERY' skill id to reflect LOX bottle system.
 	trees[SkillPackColdVerge.PACK_ID] = cold_tree
 
 	last_built = Time.get_datetime_string_from_system()

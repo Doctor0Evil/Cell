@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Tryognik Dashboard ECS Fargate skeleton (staging)'
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC for ECS resources
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Subnets for ECS tasks (private)
+  PublicSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Public subnets for the ALB
+  WebEcrRepoName:
+    Type: String
+    Default: tryognik-web-repo
+  ApiEcrRepoName:
+    Type: String
+    Default: tryognik-api-repo
+
+Resources:
+  WebEcrRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Ref WebEcrRepoName
+  ApiEcrRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Ref ApiEcrRepoName
+
+  TryognikCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: tryognik-staging-cluster
+
+  TryognikALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: tryognik-staging-alb
+      Subnets: !Ref PublicSubnetIds
+      SecurityGroups: [] # fill as needed
+
+Outputs:
+  WebEcrRepo:
+    Value: !Ref WebEcrRepoName
+    Description: ECR repository for web image
+  ApiEcrRepo:
+    Value: !Ref ApiEcrRepoName
+    Description: ECR repository for api image
+  ClusterName:
+    Value: !Ref TryognikCluster
+    Description: ECS cluster name
+  AlbDns:
+    Value: !GetAtt TryognikALB.DNSName
+    Description: ALB DNS (assign listeners and target groups manually for now)

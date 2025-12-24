@@ -1,0 +1,16 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "hull_bruiser"
+display_name = "Hull Bruiser"
+description = "You punch holes in hulls and expectations."
+
+strength_delta = 3.0
+agility_delta = -2.0
+
+status_rules = { "COMBAT": { "melee_damage_mult": 1.20, "knockdown_resist": 0.15 } }
+
+narrative_tags = ["BRAWL", "HULL_TRAINED"]
+respect_deltas = { "PIT_COMBAT": 10 }

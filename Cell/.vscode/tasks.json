@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Sync shaders to Godot (posix)",
+      "type": "shell",
+      "command": "rsync",
+      "args": [
+        "-av",
+        "--delete",
+        "shaders_src/",
+        "shaders/"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Sync shaders to Godot (win)",
+      "type": "shell",
+      "command": "robocopy",
+      "args": [
+        "shaders_src",
+        "shaders",
+        "/E",
+        "/MIR"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

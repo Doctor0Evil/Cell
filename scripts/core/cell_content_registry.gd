@@ -1,5 +1,8 @@
-extends Resource
+extends Node
 class_name CellContentRegistry
+
+# Note: This is intended to be an autoload (singleton). Extending Node ensures
+# it can be registered in Project Settings -> AutoLoad and used as an instance.
 
 # This Resource can be saved as `res://config/cell_content_registry.tres`
 # and loaded by autoloads or scene managers.
@@ -35,38 +38,77 @@ var regions := {
         "difficulty": 1,
         "temperature_modifier": -0.5,
         "oxygen_modifier": -0.1,
-        "primary_threats": ["SPINE_CRAWLER", "BREATHER"],
-        "key_loot": ["OXYGEN_CAPSULE", "HEAT_CORE_FRAGMENT", "RATION_CHIP_TIER_I"],
+        "contamination_risk": 0.15,
+        "tags": ["ASHVEIL_DRIFT", "DEBRIS_STRATUM"],
+        "tileset_keys": ["facility_corridor_ash", "debris_belt_metal"],
+        "ambience_tags": ["ASH_VENT_HISS", "DISTANT_METAL_GROAN"],
+        "spawn_density": 0.12,
+        "enemy_spawn_table": [],
+        "loot_spawn_table": [],
+        "key_loot": ["CON_LOX_CRYO_CORE_STD", "HEAT_CORE_FRAGMENT", "RATION_CHIP_TIER_I"],
+        "sanity_mult": 1.0,
+        "runtime_script_path": "res://scripts/world/regions/ashveil_debris_stratum_runtime.gd",
         "scene_path": "res://scenes/world/ashveil_debris_stratum.tscn"
     },
+
     "IRON_HOLLOW_SPINAL_TRENCH": {
         "display_name": "Iron Hollow Spinal Trench",
         "difficulty": 2,
         "temperature_modifier": -0.2,
         "oxygen_modifier": -0.15,
+        "contamination_risk": 0.22,
+        "tags": ["IRON_HOLLOW", "SPINAL_TRENCH"],
+        "tileset_keys": ["habitat_flesh_overgrowth", "asteroid_spinal_trench"],
+        "ambience_tags": ["BIOMASS_PULSE", "STONE_GROAN_METAL"],
+        "spawn_density": 0.18,
+        "enemy_spawn_table": [],
+        "loot_spawn_table": [],
         "primary_threats": ["SPINE_CRAWLER", "HOLLOW_MAN", "ASH_EATER"],
         "key_loot": ["RATION_CHIP_TIER_II", "WEAPON_SCHEMATIC", "HEAT_CORE_MODULE"],
+        "sanity_mult": 1.0,
+        "runtime_script_path": "res://scripts/world/regions/iron_hollow_spinal_trench_runtime.gd",
         "scene_path": "res://scenes/world/iron_hollow_spinal_trench.tscn"
     },
+
     "COLD_VERGE_CRYO_RIM": {
         "display_name": "Cold Verge Cryo-Rim",
         "difficulty": 3,
         "temperature_modifier": -1.0,
         "oxygen_modifier": -0.3,
+        "contamination_risk": 0.28,
+        "tags": ["COLD_VERGE", "EXTERIOR_HULL"],
+        "tileset_keys": ["cryo_rim_exterior", "verge_hull_drift"],
+        "ambience_tags": ["VOID_HOWL", "CRYO_CRYSTAL_CRUNCH"],
+        "spawn_density": 0.22,
+        "enemy_spawn_table": [],
+        "loot_spawn_table": [],
         "primary_threats": ["BREATHER", "ASH_EATER", "PULSE_TERROR"],
-        "key_loot": ["OXYGEN_CAPSULE", "SUIT_UPGRADE_COLD", "RATION_CHIP_TIER_III"],
+        "key_loot": ["CON_LOX_CRYO_CORE_STD", "SUIT_UPGRADE_COLD", "RATION_CHIP_TIER_III"],
+        "sanity_mult": 1.0,
+        "runtime_script_path": "res://scripts/world/regions/cold_verge_cryo_rim_runtime.gd",
         "scene_path": "res://scenes/world/cold_verge_cryo_rim.tscn"
     },
+
     "RED_SILENCE_SIGNAL_CRADLE": {
         "display_name": "Red Silence Signal Cradle",
         "difficulty": 4,
         "temperature_modifier": -0.3,
         "oxygen_modifier": -0.2,
+        "contamination_risk": 0.35,
+        "tags": ["RED_SILENCE", "SIGNAL_CORRIDOR"],
+        "tileset_keys": ["nebula_signal_tower", "corridor_distort_relay"],
+        "ambience_tags": ["SIGNAL_WHISPER", "AI_FRAGMENT_GHOST"],
+        "spawn_density": 0.25,
+        "enemy_spawn_table": [],
+        "loot_spawn_table": [],
         "primary_threats": ["HOLLOW_MAN", "PULSE_TERROR"],
         "key_loot": ["BCI_MODULE", "AI_OVERRIDE_TOOL", "ADVANCED_MUTATION_SAMPLE"],
+        "sanity_mult": 2.1,
+        "runtime_script_path": "res://scripts/world/regions/red_silence_signal_cradle_runtime.gd",
         "scene_path": "res://scenes/world/red_silence_signal_cradle.tscn"
     }
 }
+
 
 # Enemy archetype descriptors
 var enemies := {
@@ -167,6 +209,19 @@ func get_region(id: String) -> Dictionary:
 func get_enemy(id: String) -> Dictionary:
     if enemies.has(id):
         return enemies[id]
+    return {}
+
+# Loot registry (placeholder entries for CI-safe loading)
+var loot := {
+    "CON_LOX_CRYO_CORE_STD": {
+        "display_name": "Cryo Lox Capsule (STD)",
+        "scene_path": "res://scenes/loot/lox_bottle_placeholder.tscn"
+    }
+}
+
+func get_loot(id: String) -> Dictionary:
+    if loot.has(id):
+        return loot[id]
     return {}
 
 func get_survival_config() -> Dictionary:

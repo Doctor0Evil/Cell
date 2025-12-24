@@ -219,7 +219,11 @@ func _on_start_pressed() -> void:
 
     SaveSystem.new_profile()
     GameState.reset_for_new_run()
-    GameState.load_region(&"ASHVEIL_DEBRIS_STRATUM")
+    var gs := get_node_or_null("/root/GameState")
+    if gs:
+        gs.load_region(&"ASHVEIL_DEBRIS_STRATUM")
+    else:
+        GameState.load_region(&"ASHVEIL_DEBRIS_STRATUM")
 
 func _on_continue_pressed() -> void:
     if _input_locked:

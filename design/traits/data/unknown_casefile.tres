@@ -1,0 +1,13 @@
+[gd_resource type="CellTraitDefinition" load_steps=2 format=2]
+[ext_resource path="res://design/traits/cell_traits.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id = "unknown_casefile"
+display_name = "Unknown Casefile"
+description = "Your file is mostly redactions and missing decks."
+
+status_rules = { "GLOBAL": { "starting_rep_shift": 0.0 } }
+
+narrative_tags = ["MYSTERY_SUBJECT"]
+respect_deltas = { "INFO_BROKERS": 5, "RISK_AVERSE_FACTIONS": -3 }
