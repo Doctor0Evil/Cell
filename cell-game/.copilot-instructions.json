@@ -1,0 +1,8 @@
+{
+  "scope": "cell-game",
+  "rules": [
+    "This repo is for the Cell standalone PC horror game.",
+    "Do not introduce BCI, EEG, neuromorphic, AU.ET, CSP, ALN, JavaSpectre, VNode, SessionTicket, or CEM concepts.",
+    "Use only standard game-engine and PC tooling integrations."
+  ]
+}
